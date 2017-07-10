@@ -15,7 +15,7 @@ RootModule = 'MDSTools.psm1'
 ModuleToProcess = ''
 
 # Version number of this module.
-ModuleVersion = '1.0.1.11'
+ModuleVersion = '1.0.0.11'
 
 # ID used to uniquely identify this module
 GUID = 'de49acac-5b32-408a-8364-da71ae77d486'
@@ -30,40 +30,40 @@ CompanyName = ''
 Copyright = '(c) 2016 Rick A. All rights reserved.'
 
 # Description of the functionality provided by this module
-Description = ''
+Description = 'Messaging and Directory Services Tools.  For use in day to day administration of Active Directory, Office 365, Exchange, and Exchange Online.'
 
 # Minimum version of the Windows PowerShell engine required by this module
-PowerShellVersion = ''
+# PowerShellVersion = ''
 
 # Name of the Windows PowerShell host required by this module
-PowerShellHostName = ''
+# PowerShellHostName = ''
 
 # Minimum version of the Windows PowerShell host required by this module
-PowerShellHostVersion = ''
+# PowerShellHostVersion = ''
 
 # Minimum version of the .NET Framework required by this module
-DotNetFrameworkVersion = ''
+# DotNetFrameworkVersion = ''
 
 # Minimum version of the common language runtime (CLR) required by this module
-CLRVersion = ''
+# CLRVersion = ''
 
 # Processor architecture (None, X86, Amd64, IA64) required by this module
-ProcessorArchitecture = ''
+# ProcessorArchitecture = ''
 
 # Modules that must be imported into the global environment prior to importing this module
-RequiredModules = @()
+# RequiredModules = @()
 
 # Assemblies that must be loaded prior to importing this module
-RequiredAssemblies = @()
+# RequiredAssemblies = @()
 
 # Script files (.ps1) that are run in the caller's environment prior to importing this module
-ScriptsToProcess = @()
+# ScriptsToProcess = @()
 
 # Type files (.ps1xml) to be loaded when importing this module
-TypesToProcess = @()
+# TypesToProcess = @()
 
 # Format files (.ps1xml) to be loaded when importing this module
-FormatsToProcess = @()
+# FormatsToProcess = @()
 
 # Modules to import as nested modules of the module specified in ModuleToProcess
 NestedModules = @('.\NestedModules\Configuration\1.0.2\Configuration.psd1')
@@ -81,10 +81,10 @@ VariablesToExport = '*'
 AliasesToExport = '*'
 
 # List of all modules packaged with this module
-ModuleList = @()
+# ModuleList = @()
 
 # List of all files packaged with this module
-FileList = @()
+# FileList = @()
 
 # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
 PrivateData = @{
