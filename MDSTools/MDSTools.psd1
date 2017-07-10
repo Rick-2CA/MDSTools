@@ -12,7 +12,7 @@
 RootModule = 'MDSTools.psm1'
 
 # Script module or binary module file associated with this manifest
-ModuleToProcess = ''
+# ModuleToProcess = ''
 
 # Version number of this module.
 ModuleVersion = '1.0.1.12'
@@ -51,7 +51,7 @@ Description = 'Messaging and Directory Services Tools.  For use in day to day ad
 # ProcessorArchitecture = ''
 
 # Modules that must be imported into the global environment prior to importing this module
-# RequiredModules = @()
+RequiredModules = @('Configuration')
 
 # Assemblies that must be loaded prior to importing this module
 # RequiredAssemblies = @()
@@ -66,7 +66,7 @@ Description = 'Messaging and Directory Services Tools.  For use in day to day ad
 # FormatsToProcess = @()
 
 # Modules to import as nested modules of the module specified in ModuleToProcess
-NestedModules = @('.\NestedModules\Configuration\1.0.2\Configuration.psd1')
+# NestedModules = @('.\NestedModules\Configuration\1.0.2\Configuration.psd1')
 
 # Functions to export from this module
 FunctionsToExport = @('Add-MDSCredential','Connect-MDSMsolService','Disable-MDSMsolLicenseServicePlan','Enable-MDSMsolLicenseServicePlan','Find-MDSUserName','Get-MDSConfiguration','Get-MDSCredential','Get-MDSExchServerFromLDAP','Get-MDSMsolLicenseServicePlan','Import-MDSExchOnline','Import-MDSExchOnprem','Import-MDSSkypeOnprem','Remove-MDSCredential','Set-MDSConfiguration','Start-MDSADSyncSyncCycle','Start-MDSADUC','Start-MDSExchMgmtConsole','Start-MDSExplorer','Start-MDSGPMC','Start-MDSPowerShell','Start-MDSSitesAndServices','Test-MDSADAuthentication','Update-MDSCredential')
