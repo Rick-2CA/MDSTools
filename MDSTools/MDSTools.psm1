@@ -7,11 +7,11 @@ New-Alias -Name Import-MDSEXO -Value Import-MDSExchOnline
 
 # Import everything in the functions folders
 Write-Verbose "Importing Functions"
-$publicFunctions = Get-ChildItem "$moduleRoot\public-functions\*.ps1" | Where-Object { -not ($_.FullName.Contains(".Tests.")) }
-$publicFunctions | ForEach-Object {Write-Verbose "Public Function: $($_.FullName)"; . ([scriptblock]::Create([io.file]::ReadAllText($PSItem)))} 
-  
-$privateFunctions = Get-ChildItem "$moduleRoot\private-functions\*.ps1" | Where-Object { -not ($_.FullName.Contains(".Tests.")) }
+$privateFunctions = Get-ChildItem "$moduleRoot\Private\*.ps1" | Where-Object { -not ($_.FullName.Contains(".Tests.")) }
 $privateFunctions | ForEach-Object {Write-Verbose "Private Function: $($_.FullName)"; . ([scriptblock]::Create([io.file]::ReadAllText($PSItem)))}
+
+$publicFunctions = Get-ChildItem "$moduleRoot\Public\*.ps1" | Where-Object { -not ($_.FullName.Contains(".Tests.")) }
+$publicFunctions | ForEach-Object {Write-Verbose "Public Function: $($_.FullName)"; . ([scriptblock]::Create([io.file]::ReadAllText($PSItem)))} 
 
 # Create Variables
 Write-Verbose "Creating Variables"
