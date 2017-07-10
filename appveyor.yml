@@ -1,0 +1,29 @@
+# See http://www.appveyor.com/docs/appveyor-yml for many more options
+
+environment:
+  NugetApiKey:
+    secure: 7Sx66gU/nWGTnFl5alG+JnBdjZ8KXOKQXfMgAE1asCy6v8fn9kwnR8h7xz8Kg4On
+  GitHubKey:
+    secure: T5RlUwXxR6ISX0I1ejVWROGVCEzwPjeGgX2mQOnO+et5WYRZkUcAvTFGD1Xp/2O/
+
+# Allow WMF5 (i.e. PowerShellGallery functionality)
+os: WMF 5
+
+# Skip on updates to the readme.
+# We can force this by adding [skip ci] or [ci skip] anywhere in commit message 
+skip_commits:
+  message: /(update|updated) (readme|docs|version|appveyor).*/
+  
+# Do not increment build numbers on pull requests
+pull_requests:
+  do_not_increment_build_number: true
+
+build: false
+
+# Store GitHub credentials & kick off the CI/CD pipeline
+test_script:
+  - git config --global credential.helper store
+  - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GitHubKey):x-oauth-basic@github.com`n"
+  - git config --global user.email "Rick-2CA@users.noreply.github.com"
+  - git config --global user.name "Rick A."
+  - ps: . .\Build\build.ps1
