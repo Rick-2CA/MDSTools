@@ -92,7 +92,7 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        Tags = @('PowerShell','Exchange','ExchangeOnline','Office365','O365','SysAdmin','Admin')
+        Tags = @('PowerShell','Exchange','ExchangeOnline','Office365','O365','SysAdmin','Admin','ActiveDirectory')
 
         # A URL to the license for this module.
         LicenseUri = 'https://github.com/Rick-2CA/MDSTools/blob/master/LICENSE'
