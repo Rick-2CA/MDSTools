@@ -1,7 +1,7 @@
 # Messaging and Directory Services Tools (MDSTools)  
 The MDSTools module is a collection of functions developed supporting an Active Directory environment with Office 365 and an Exchange hybrid deployment (Exchange and Exchange Online).  
 
-## Requirements
+## Module Requirements
 * PowerShell v4
 
 ## Function Requirements
