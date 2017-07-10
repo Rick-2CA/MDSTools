@@ -59,9 +59,5 @@ The main purpose of the module is to make day to day administrative tasks easier
 
 Documentation for each function is available with `Get-Help`.
 
-## Examples
-
-
-
 ## Contributing
 Feature additions are heavily influenced by the needs of my environment and your contributions!
