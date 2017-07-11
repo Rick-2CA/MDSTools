@@ -1,5 +1,8 @@
 # See http://www.appveyor.com/docs/appveyor-yml for many more options
 
+# Hardcode clone folder for proper ModuleName casing
+clone_folder: c:\projects\MDSTools
+
 environment:
   NugetApiKey:
     secure: 7Sx66gU/nWGTnFl5alG+JnBdjZ8KXOKQXfMgAE1asCy6v8fn9kwnR8h7xz8Kg4On
@@ -27,3 +30,4 @@ test_script:
   - git config --global user.email "Rick-2CA@users.noreply.github.com"
   - git config --global user.name "Rick A."
   - ps: . .\Build\build.ps1
+
