@@ -16,7 +16,9 @@ Functions may require one or more of the services or modules below. They are onl
 * [Configuration](https://www.powershellgallery.com/packages/Configuration) module by Joel Bennett
 
 ## Installation
-The module is pending availablity on the [PowerShell Gallery](https://www.powershellgallery.com).
+The module is available on the [PowerShell Gallery](https://www.powershellgallery.com/packages/mdstools) and can be installed by running:
+
+`Find-Module MDSTools | Install-Module`
 
 ## Usage
 The main purpose of the module is to make day to day administrative tasks easier through functions or groups of functions that cover the following subgroups:
