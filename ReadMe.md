@@ -13,7 +13,7 @@ Functions may require one or more of the services or modules below. They are onl
 * Azure AD Connect server
 * ActiveDirectory module
 * GroupPolicy module
-* [Configuration](https://www.powershellgallery.com/packages/Configuration) module by Joel Bennett
+* [Configuration](https://www.powershellgallery.com/packages/Configuration) module by Joel Bennett.  If you install via the PowerShell Gallery the supported version of this module will be installed automatically.
 
 ## Installation
 The module is available on the [PowerShell Gallery](https://www.powershellgallery.com/packages/mdstools) and can be installed by running:
