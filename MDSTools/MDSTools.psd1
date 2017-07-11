@@ -24,7 +24,7 @@ GUID = 'de49acac-5b32-408a-8364-da71ae77d486'
 Author = 'Rick A'
 
 # Company or vendor of this module
-CompanyName = ''
+CompanyName = 'MDSTools'
 
 # Copyright statement for this module
 Copyright = '(c) 2016 Rick A. All rights reserved.'
@@ -51,7 +51,7 @@ Description = 'Messaging and Directory Services Tools.  For use in day to day ad
 # ProcessorArchitecture = ''
 
 # Modules that must be imported into the global environment prior to importing this module
-RequiredModules = @('Configuration')
+RequiredModules = @(@{ModuleName="Configuration"; ModuleVersion="1.0.2"})
 
 # Assemblies that must be loaded prior to importing this module
 # RequiredAssemblies = @()
