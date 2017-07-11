@@ -15,7 +15,7 @@ RootModule = 'MDSTools.psm1'
 # ModuleToProcess = ''
 
 # Version number of this module.
-ModuleVersion = '1.0.2.16'
+ModuleVersion = '1.0.3.17'
 
 # ID used to uniquely identify this module
 GUID = 'de49acac-5b32-408a-8364-da71ae77d486'
@@ -111,5 +111,6 @@ PrivateData = @{
 } # End of PrivateData hashtable
 
 }
+
 
 
