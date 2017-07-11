@@ -55,7 +55,7 @@ Function Get-MDSCredential {
 	
 	Process {
 		If ((Test-Path $CredentialFilePath) -eq $False) {
-			Write-Warning "Please use 'Add-MDSCredential' to populate your credential store."
+			Write-Warning "Please use 'Add-MDSCredential' to populate your credential store.  The store file will be saved in $CredentialFilePath."
 			Return
 		}
 		

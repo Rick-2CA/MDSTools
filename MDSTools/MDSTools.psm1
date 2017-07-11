@@ -22,7 +22,7 @@ Try {
     $null = Get-MDSConfiguration
 }
 Catch {
-     Write-Host "Thank you for using MDS Tools. You must configure your module settings to avoid this warning when importing the module. Use 'Get-Help Set-MDSConfiguration' to see configuration settings and 'Set-MDSConfiguration' to set them." -ForegroundColor Black -BackgroundColor Yellow
+     Write-Host "Thank you for using MDS Tools. You must configure your module settings to avoid this warning when importing the module. Use 'Get-Help Set-MDSConfiguration' to see configuration settings and 'Set-MDSConfiguration' to set them.  The store file will be saved in $CredentialFilePath." -ForegroundColor Black -BackgroundColor Yellow
 }
 
 # Export module members
