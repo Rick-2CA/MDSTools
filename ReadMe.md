@@ -31,33 +31,33 @@ The main purpose of the module is to make day to day administrative tasks easier
 
 ## Available Commands  
 
-    CommandType     Name                                Version    Source
-    -----------     ----                                -------    ------
-    Alias           Import-MDSEXO                       0.0.6      MDSTools
-    Alias           Start-MDSEMC                        0.0.6      MDSTools
-    Function        Add-MDSCredential                   0.0.6      MDSTools
-    Function        Connect-MDSMsolService              0.0.6      MDSTools
-    Function        Disable-MDSMsolLicenseServicePlan   0.0.6      MDSTools
-    Function        Enable-MDSMsolLicenseServicePlan    0.0.6      MDSTools
-    Function        Find-MDSUserName                    0.0.6      MDSTools
-    Function        Get-MDSConfiguration                0.0.6      MDSTools
-    Function        Get-MDSCredential                   0.0.6      MDSTools
-    Function        Get-MDSExchServerFromLDAP           0.0.6      MDSTools
-    Function        Get-MDSMsolLicenseServicePlan       0.0.6      MDSTools
-    Function        Import-MDSExchOnline                0.0.6      MDSTools
-    Function        Import-MDSExchOnprem                0.0.6      MDSTools
-    Function        Import-MDSSkypeOnPrem               0.0.6      MDSTools
-    Function        Remove-MDSCredential                0.0.6      MDSTools
-    Function        Set-MDSConfiguration                0.0.6      MDSTools
-    Function        Start-MDSADSyncSyncCycle            0.0.6      MDSTools
-    Function        Start-MDSADUC                       0.0.6      MDSTools
-    Function        Start-MDSExchMgmtConsole            0.0.6      MDSTools
-    Function        Start-MDSExplorer                   0.0.6      MDSTools
-    Function        Start-MDSGPMC                       0.0.6      MDSTools
-    Function        Start-MDSPowerShell                 0.0.6      MDSTools
-    Function        Start-MDSSitesAndServices           0.0.6      MDSTools
-    Function        Test-MDSADAuthentication            0.0.6      MDSTools
-    Function        Update-MDSCredential                0.0.6      MDSTools
+    CommandType     Name                                    Version    Source
+    -----------     ----                                    -------    ------
+    Alias           Import-MDSEXO                           1.0.6.20   mdstools
+    Alias           Start-MDSEMC                            1.0.6.20   mdstools
+    Function        Add-MDSCredential                       1.0.6.20   mdstools
+    Function        Connect-MDSMsolService                  1.0.6.20   mdstools
+    Function        Disable-MDSMsolLicenseServicePlan       1.0.6.20   mdstools
+    Function        Enable-MDSMsolLicenseServicePlan        1.0.6.20   mdstools
+    Function        Find-MDSUserName                        1.0.6.20   mdstools
+    Function        Get-MDSConfiguration                    1.0.6.20   mdstools
+    Function        Get-MDSCredential                       1.0.6.20   mdstools
+    Function        Get-MDSExchServerFromLDAP               1.0.6.20   mdstools
+    Function        Get-MDSMsolLicenseServicePlan           1.0.6.20   mdstools
+    Function        Import-MDSExchOnline                    1.0.6.20   mdstools
+    Function        Import-MDSExchOnprem                    1.0.6.20   mdstools
+    Function        Import-MDSSkypeOnPrem                   1.0.6.20   mdstools
+    Function        Remove-MDSCredential                    1.0.6.20   mdstools
+    Function        Set-MDSConfiguration                    1.0.6.20   mdstools
+    Function        Start-MDSADSyncSyncCycle                1.0.6.20   mdstools
+    Function        Start-MDSADUC                           1.0.6.20   mdstools
+    Function        Start-MDSExchMgmtConsole                1.0.6.20   mdstools
+    Function        Start-MDSExplorer                       1.0.6.20   mdstools
+    Function        Start-MDSGPMC                           1.0.6.20   mdstools
+    Function        Start-MDSPowerShell                     1.0.6.20   mdstools
+    Function        Start-MDSSitesAndServices               1.0.6.20   mdstools
+    Function        Test-MDSADAuthentication                1.0.6.20   mdstools
+    Function        Update-MDSCredential                    1.0.6.20   mdstools
 
 Documentation for each function is available with `Get-Help`.
 
