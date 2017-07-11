@@ -46,7 +46,8 @@ Function Add-MDSCredential {
                 Return
             }
 		
-		$Hash | Export-CliXML $CredentialFileName
+		Write-Verbose "Updating file $CredentialFilePath"
+		$Hash | Export-CliXML $CredentialFilePath
 		
 	}
 	

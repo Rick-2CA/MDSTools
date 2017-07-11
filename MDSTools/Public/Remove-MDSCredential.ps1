@@ -22,38 +22,39 @@ Function Remove-MDSCredential {
         Get-MDSCredential -ErrorAction Stop |
                 Select-Object -ExpandProperty Name
         )
-        New-DynamicParam -Name Name -Type Array -ValidateSet $Options -Position 0 -ParameterSetName Name
+        New-DynamicParam -Name Name -ValidateSet $Options -Position 0 -ParameterSetName Name
 	}
 
 	Begin {$Name = $PSBoundParameters.Name}
 	
 	Process {
+        # Get a hash table of the credential store
 		Try {$Hash = Get-MDSCredential -SortByName:$false -ErrorAction Stop}
         Catch {
             $PSCmdlet.ThrowTerminatingError($PSItem)
         }
 
-        # If you enable support for mulitple items change Update $Object & $Name below
-        ForEach ($Object in $Name) {
-            Try {
-                If ($Hash[$Object]) {
-                    $Hash.Remove($Object)
-                    Write-Verbose "Removed credential record $($Object)"
-                }
-                Else {
-                    $Message = "A record for {0} does not exist." -f $Object
-                    Write-Error -Message $Message -ErrorAction Stop -Exception ([System.Management.Automation.MethodInvocationException]::new())
-                    Continue
-                }
-                
+        # Confirm the removal name exists and remove it from the ash
+        Try {
+            If ($Hash[$Name]) {
+                $Hash.Remove($Name)
+                Write-Verbose "Removed credential record $($Name)"
             }
-            Catch {
-                Write-Error $PSItem
+            Else {
+                $Message = "A record for {0} does not exist." -f $Name
+                Write-Error -Message $Message -ErrorAction Stop -Exception ([System.Management.Automation.MethodInvocationException]::new())
                 Continue
             }
+            
         }
-		
-		$Hash | Export-CliXML $CredentialFileName
+        Catch {
+            Write-Error $PSItem
+            Continue
+        }
+
+		# Update the store file
+        Write-Verbose "Updating file $CredentialFilePath"
+		$Hash | Export-CliXML $CredentialFilePath
 	}
 	
 	End {}

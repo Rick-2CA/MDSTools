@@ -61,6 +61,7 @@ Function Get-MDSCredential {
 		
 		Try {
 			$CredentialFile = Import-CliXML $CredentialFilePath -ErrorAction Stop
+			Write-Verbose "Found file $CredentialFilePath"
 		}
 		Catch {
 			$PSCmdlet.ThrowTerminatingError($PSItem)

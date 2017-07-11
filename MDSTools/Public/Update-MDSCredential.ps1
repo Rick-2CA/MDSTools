@@ -42,7 +42,7 @@ Function Update-MDSCredential {
             Try { 
                 $Hash.Remove($Name)
                 $Hash.Add($Name,@($UserName,$Password))
-                Write-Verbose "Added credential record $($Name)"
+                Write-Verbose "Updated credential record $($Name)"
             }
             Catch {
                 $PSCmdlet.ThrowTerminatingError($PSItem)
@@ -54,7 +54,8 @@ Function Update-MDSCredential {
              Return
         }
         
-		$Hash | Export-CliXML $CredentialFileName
+        Write-Verbose "Updating file $CredentialFilePath"
+		$Hash | Export-CliXML $CredentialFilePath
 	}
 	
 	End {}
