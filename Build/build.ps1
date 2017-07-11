@@ -17,6 +17,7 @@ ForEach ($Module in $Modules) {
     If (-not (Get-Module -Name $Module -ListAvailable)) {
             Switch ($Module) {
                 Pester  {Install-Module $Module -Force -SkipPublisherCheck}
+                Configuration {Install-Module $Module -Force -AllowClobber}
                 Default {Install-Module $Module -Force}
             }
            
