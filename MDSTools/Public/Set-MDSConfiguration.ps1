@@ -35,12 +35,12 @@ function Set-MDSConfiguration {
         $Configuration = Import-Configuration
         If ($Configuration) {
             $Configuration.Add($Name,$Value)
-            Get-Module MDSTools -ListAvailAble | Export-Configuration $Configuration -Scope Enterprise
+            Get-Module MDSTools | Export-Configuration $Configuration -Scope Enterprise
         }
         Else {
             Write-Host "Export new value"
             $FirstEntry = @{$Name = $Value}
-            Get-Module MDSTools -ListAvailAble | Export-Configuration $FirstEntry -Scope Enterprise
+            Get-Module MDSTools | Export-Configuration $FirstEntry -Scope Enterprise
         }
     }
     end {}
