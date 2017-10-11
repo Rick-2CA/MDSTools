@@ -59,9 +59,10 @@ Function Start-MDSADSyncSyncCycle {
 
 		# Use the configuration file if a servername was not specified
 		If (-not $ServerName) {
-			Try {$ServerName = Get-MDSConfiguration -Setting ADConnectServer}
+			$Setting = 'ADConnectServer'
+			Try {$ServerName = Get-MDSConfiguration -Setting $Setting}
 			Catch {
-				Throw "A server name was not specified.  Use the -ServerName parameter or configure the ADConnectServer setting with Set-MDSConfiguration."
+				Throw "A server name was not specified.  Use the -ServerName parameter or configure the $Setting setting with Set-MDSConfiguration."
 			}
 		}
 

@@ -61,7 +61,11 @@ Function Import-MDSSkypeOnPrem {
 
 		# Use the configuration file if a servername was not specified
 		If (-not $ServerName) {
-			$ServerName = Get-MDSConfiguration -Setting SkypeOnPremServer
+			$Setting = 'SkypeOnPremServer'
+			Try {$ServerName = Get-MDSConfiguration -Setting $Setting}
+			Catch {
+				Throw "A server name was not specified.  Use the -ServerName parameter or configure the $Setting setting with Set-MDSConfiguration."
+			}
 		}
 		
 		# New-PSSession
