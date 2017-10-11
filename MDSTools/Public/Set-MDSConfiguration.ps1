@@ -33,12 +33,18 @@ function Set-MDSConfiguration {
     begin {}
     process {
         $Configuration = Import-Configuration
-        If ($Configuration) {
+        If ($null -ne $Configuration) {
+            If ($Configuration[$Name]) {
+                Write-Verbose 'Removing old value'
+                $Configuration.Remove($Name)
+            }
+
+            Write-Verbose 'Adding old value'
             $Configuration.Add($Name,$Value)
             Get-Module MDSTools | Export-Configuration $Configuration -Scope Enterprise
         }
         Else {
-            Write-Host "Export new value"
+            Write-Verbose "Exporting new value"
             $FirstEntry = @{$Name = $Value}
             Get-Module MDSTools | Export-Configuration $FirstEntry -Scope Enterprise
         }
