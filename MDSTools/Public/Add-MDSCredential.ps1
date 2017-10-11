@@ -11,6 +11,11 @@ Function Add-MDSCredential {
 
 	Create a credential entry named 'MyCred1'
 
+	.EXAMPLE
+    Add-MDSCredential -Name MyCred1 -UserName 'ASmith'
+
+	Create a credential entry named 'MyCred1'
+
     .NOTES
 
 	#>
@@ -18,7 +23,10 @@ Function Add-MDSCredential {
 	Param (
 		[parameter(Position=0, Mandatory=$True)]
 		[ValidateNotNullOrEmpty()]
-		[string]$Name
+		[string]$Name, 
+		
+		[Parameter()]
+		[string]$UserName
 	)
 
 	Begin {
@@ -27,7 +35,17 @@ Function Add-MDSCredential {
 	}
 	
 	Process {
-			Try {$Credentials = Get-Credential -ErrorAction Stop}
+			$getCredentialSplat = @{
+				Message 	= "Credentials will be stored as $Name in the MDSTools credential store"
+				ErrorAction = 'Stop'
+			}
+			If ($null -ne $PSBoundParameters.UserName) {
+				$getCredentialSplat.Add('UserName',$UserName)
+			}
+			Try {
+				
+				$Credentials = Get-Credential @getCredentialSplat
+			}
 			Catch {$PSCmdlet.ThrowTerminatingError($PSItem)}
 			$Username = $Credentials.UserName
 			$Password = $Credentials.Password | ConvertFrom-SecureString
