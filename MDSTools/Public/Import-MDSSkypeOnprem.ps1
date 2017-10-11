@@ -24,7 +24,7 @@ Function Import-MDSSkypeOnPrem {
 		[Parameter(Mandatory)]
 		[string]$MDSCredential,
 
-		[Parameter(Mandatory)]
+		[Parameter()]
 		[string]$ServerName,
 
 		[string]$Prefix
