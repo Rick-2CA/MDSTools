@@ -33,3 +33,10 @@ $ExportModule = @{
     Variable = @()
 }
 Export-ModuleMember @ExportModule
+
+# Register Argument Completers - Version 5+
+If ($PSVersionTable.PSVersion.Major -ge 5) {
+    # Allows the MDSCredential parameter to auto-complete with the names of each Get-MDSCredential entry
+    # across any command that has MDSCredential as a parameter
+    Register-ArgumentCompleter -ParameterName MDSCredential -ScriptBlock {(Get-MDSCredential).Name}
+}
