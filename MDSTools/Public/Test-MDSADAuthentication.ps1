@@ -16,12 +16,17 @@ Function Test-MDSADAuthentication {
 
 	Prompt for credentials for username MyUserName and validate the credentials with Active Directory on a specified domain controller
 
-    .NOTES
+	.NOTES
+	The Confirm parameter is prompted by default due to the chance of locking out accounts.
 
 	#>
-	[cmdletbinding()]
-    param(
-		[parameter(Position=0,ParameterSetName="Credential", Mandatory=$True)]
+	[CmdletBinding(
+		SupportsShouldProcess=$True,
+		ConfirmImpact='High'
+	)]
+
+    Param(
+		[parameter(Position=0,Mandatory=$True)]
 		[ValidateNotNullOrEmpty()]
 		[System.Management.Automation.CredentialAttribute()]
 		$Credential,
@@ -32,7 +37,7 @@ Function Test-MDSADAuthentication {
 
 #requires -Module ActiveDirectory
 
-	If ($DomainController) {
+	If ($null -ne $PSBoundParameters.DomainController) {
 		Try {$DomainControllerDN = Get-ADDomainController $DomainController -ErrorAction Stop |
 				Select-Object -ExpandProperty ComputerObjectDN}
 		Catch  {
@@ -41,7 +46,9 @@ Function Test-MDSADAuthentication {
 		$LDAPPath = "LDAP://$($DomainControllerDN)"
 	}
 
-    (New-Object DirectoryServices.DirectoryEntry "$($LDAPPath)",$NetworkCredential.UserName,$Credential.GetNetworkCredential()).psbase.name -ne $null
+	If ($PSCmdlet.ShouldProcess($Credential.UserName,"Test-MDSADAuthentication")) {
+		(New-Object DirectoryServices.DirectoryEntry "$($LDAPPath)",$Credential.UserName,$Credential.GetNetworkCredential().Password).psbase.name -ne $null
+	}
 }
 
 <# 
