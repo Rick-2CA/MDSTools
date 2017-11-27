@@ -14,7 +14,10 @@ Function Remove-MDSCredential {
     .NOTES
 
 	#>
-	[cmdletbinding()]
+	[CmdletBinding(
+		SupportsShouldProcess=$True,
+		ConfirmImpact='High'
+	)]
 	Param ()
 
     DynamicParam {
@@ -37,8 +40,10 @@ Function Remove-MDSCredential {
         # Confirm the removal name exists and remove it from the ash
         Try {
             If ($Hash[$Name]) {
-                $Hash.Remove($Name)
-                Write-Verbose "Removed credential record $($Name)"
+                If ($PSCmdlet.ShouldProcess($Name,"Remove credential record")) {
+                    $Hash.Remove($Name)
+                    Write-Verbose "Removed credential record $($Name)"
+                }
             }
             Else {
                 $Message = "A record for {0} does not exist." -f $Name
