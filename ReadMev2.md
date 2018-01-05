@@ -25,6 +25,13 @@ The module is available on the [PowerShell Gallery](https://www.powershellgaller
 
 `Find-Module MDSTools | Install-Module`
 
+## Updating from v1 to v2
+
+Password storage has been moved from the machine location to the user location.  This means you'll need to copy your credential file to the new location or recreate your file.
+
+* Machine location:  C:\Users\$($Env:UserName)\AppData\Local\WindowsPowerShell\MDSTools\MDSTools\MDSCredentials.xml
+* User location:  C:\Users\$($Env:UserName)\AppData\Local\WindowsPowerShell\MDSTools\MDSTools\MDSCredentials.xml
+
 ## Usage
 
 The main purpose of the module is to make day to day administrative tasks easier through functions or groups of functions that cover the following subgroups:
