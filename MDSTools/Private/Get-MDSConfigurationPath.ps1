@@ -1,4 +1,4 @@
-function Get-MDSCredentialPath {
+function Get-MDSConfigurationPath {
 	[cmdletbinding()]
     param(
         [string]$FileName
@@ -6,9 +6,8 @@ function Get-MDSCredentialPath {
 
     begin {}
     process {
-        $ConfigurationMachinePath = (Get-StoragePath -Scope User)
+        $ConfigurationMachinePath = (Get-StoragePath -Scope Enterprise)
         Join-Path $ConfigurationMachinePath $FileName
     }
     end {}
-
 }

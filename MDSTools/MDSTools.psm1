@@ -11,7 +11,7 @@ $privateFunctions = Get-ChildItem "$moduleRoot\Private\*.ps1" | Where-Object { -
 $privateFunctions | ForEach-Object {Write-Verbose "Private Function: $($_.FullName)"; . ([scriptblock]::Create([io.file]::ReadAllText($PSItem)))}
 
 $publicFunctions = Get-ChildItem "$moduleRoot\Public\*.ps1" | Where-Object { -not ($_.FullName.Contains(".Tests.")) }
-$publicFunctions | ForEach-Object {Write-Verbose "Public Function: $($_.FullName)"; . ([scriptblock]::Create([io.file]::ReadAllText($PSItem)))} 
+$publicFunctions | ForEach-Object {Write-Verbose "Public Function: $($_.FullName)"; . ([scriptblock]::Create([io.file]::ReadAllText($PSItem)))}
 
 # Create Variables
 Write-Verbose "Creating Variables"
@@ -22,7 +22,8 @@ Try {
     $null = Get-MDSConfiguration
 }
 Catch {
-     Write-Host "Thank you for using MDS Tools. You must configure your module settings to avoid this warning when importing the module. Use 'Get-Help Set-MDSConfiguration' to see configuration settings and 'Set-MDSConfiguration' to set them.  The store file will be saved in $CredentialFilePath." -ForegroundColor Black -BackgroundColor Yellow
+    $ConfigurationFilePath = Get-MDSConfigurationPath -FileName Configuration.psd1
+     Write-Host "Thank you for using MDS Tools. You must configure your module settings to avoid this warning when importing the module. Use 'Get-Help Set-MDSConfiguration' to see configuration settings and 'Set-MDSConfiguration' to set them.  The store file will be saved in $ConfigurationFilePath." -ForegroundColor Black -BackgroundColor Yellow
 }
 
 # Export module members

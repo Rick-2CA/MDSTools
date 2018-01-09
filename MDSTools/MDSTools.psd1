@@ -15,7 +15,7 @@ RootModule = 'MDSTools.psm1'
 # ModuleToProcess = ''
 
 # Version number of this module.
-ModuleVersion = '1.2.7.27'
+ModuleVersion = '2.0.7.27'
 
 # ID used to uniquely identify this module
 GUID = 'de49acac-5b32-408a-8364-da71ae77d486'
@@ -51,7 +51,7 @@ Description = 'Messaging and Directory Services Tools.  For use in day to day ad
 # ProcessorArchitecture = ''
 
 # Modules that must be imported into the global environment prior to importing this module
-RequiredModules = @(@{ModuleName="Configuration"; ModuleVersion="1.0.2"})
+RequiredModules = @(@{ModuleName="Configuration";RequiredVersion="1.2.0";GUID='e56e5bec-4d97-4dfd-b138-abbaa14464a6'})
 
 # Assemblies that must be loaded prior to importing this module
 # RequiredAssemblies = @()
@@ -66,7 +66,7 @@ RequiredModules = @(@{ModuleName="Configuration"; ModuleVersion="1.0.2"})
 # FormatsToProcess = @()
 
 # Modules to import as nested modules of the module specified in ModuleToProcess
-# NestedModules = @('.\NestedModules\Configuration\1.0.2\Configuration.psd1')
+NestedModules = @(@{ModuleName="Configuration";RequiredVersion="1.2.0";GUID='e56e5bec-4d97-4dfd-b138-abbaa14464a6'})
 
 # Functions to export from this module
 FunctionsToExport = @('Add-MDSCredential','Connect-MDSMsolService','Disable-MDSMsolLicenseServicePlan','Enable-MDSMsolLicenseServicePlan','Find-MDSUserName','Get-MDSADLockoutSource','Get-MDSConfiguration','Get-MDSCredential','Get-MDSExchServerFromLDAP','Get-MDSForestADGroupMember','Get-MDSMsolLicenseServicePlan','Import-MDSExchOnline','Import-MDSExchOnprem','Import-MDSSkypeOnprem','Remove-MDSCredential','Set-MDSConfiguration','Start-MDSADSyncSyncCycle','Start-MDSADUC','Start-MDSExchMgmtConsole','Start-MDSExplorer','Start-MDSGPMC','Start-MDSPowerShell','Start-MDSSitesAndServices','Start-MDSWebBrowser','Test-MDSADAuthentication','Update-MDSCredential')

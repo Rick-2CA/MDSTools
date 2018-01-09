@@ -17,13 +17,25 @@ Functions may require one or more of the services or modules below. They are onl
 * Azure AD Connect server
 * ActiveDirectory module
 * GroupPolicy module
-* [Configuration](https://www.powershellgallery.com/packages/Configuration) module by Joel Bennett.  If you install via the PowerShell Gallery the supported version of this module will be installed automatically.
+* [Configuration](https://www.powershellgallery.com/packages/Configuration) module by Joel Bennett.  If you install MDSTools via the PowerShell Gallery the supported version of this module will be installed automatically.
 
 ## Installation
 
 The module is available on the [PowerShell Gallery](https://www.powershellgallery.com/packages/mdstools) and can be installed by running:
 
 `Find-Module MDSTools | Install-Module`
+
+## Updating from v1 to v2
+
+Password storage has been moved from the machine location to the user location.  This means you'll need to copy your credential file to the new location or recreate your file.  Also updated to using v1.2 of the Configuration module which uses a folder called PowerShell instead of WindowsPowerShell.
+
+* Old location:  C:\Users\$($Env:UserName)\AppData\Local\WindowsPowerShell\MDSTools\MDSTools\MDSCredentials.xml
+* New location:  C:\Users\$($Env:UserName)\AppData\Local\PowerShell\MDSTools\MDSTools\MDSCredentials.xml
+
+Configuration storage was also impacted by the folder change:
+
+* Old location:  C:\Users\$($Env:UserName)\AppData\Roaming\WindowsPowerShell\MDSTools\mdstools\Configuration.psd1
+* New location:  C:\Users\$($Env:UserName)\AppData\Roaming\PowerShell\MDSTools\mdstools\Configuration.psd1
 
 ## Usage
 
@@ -39,31 +51,34 @@ The main purpose of the module is to make day to day administrative tasks easier
 
     CommandType     Name                                    Version    Source
     -----------     ----                                    -------    ------
-    Alias           Import-MDSEXO                           1.0.6.20   mdstools
-    Alias           Start-MDSEMC                            1.0.6.20   mdstools
-    Function        Add-MDSCredential                       1.0.6.20   mdstools
-    Function        Connect-MDSMsolService                  1.0.6.20   mdstools
-    Function        Disable-MDSMsolLicenseServicePlan       1.0.6.20   mdstools
-    Function        Enable-MDSMsolLicenseServicePlan        1.0.6.20   mdstools
-    Function        Find-MDSUserName                        1.0.6.20   mdstools
-    Function        Get-MDSConfiguration                    1.0.6.20   mdstools
-    Function        Get-MDSCredential                       1.0.6.20   mdstools
-    Function        Get-MDSExchServerFromLDAP               1.0.6.20   mdstools
-    Function        Get-MDSMsolLicenseServicePlan           1.0.6.20   mdstools
-    Function        Import-MDSExchOnline                    1.0.6.20   mdstools
-    Function        Import-MDSExchOnprem                    1.0.6.20   mdstools
-    Function        Import-MDSSkypeOnPrem                   1.0.6.20   mdstools
-    Function        Remove-MDSCredential                    1.0.6.20   mdstools
-    Function        Set-MDSConfiguration                    1.0.6.20   mdstools
-    Function        Start-MDSADSyncSyncCycle                1.0.6.20   mdstools
-    Function        Start-MDSADUC                           1.0.6.20   mdstools
-    Function        Start-MDSExchMgmtConsole                1.0.6.20   mdstools
-    Function        Start-MDSExplorer                       1.0.6.20   mdstools
-    Function        Start-MDSGPMC                           1.0.6.20   mdstools
-    Function        Start-MDSPowerShell                     1.0.6.20   mdstools
-    Function        Start-MDSSitesAndServices               1.0.6.20   mdstools
-    Function        Test-MDSADAuthentication                1.0.6.20   mdstools
-    Function        Update-MDSCredential                    1.0.6.20   mdstools
+    Alias           Import-MDSEXO                           2.0.7.27   MDSTools
+    Alias           Start-MDSEMC                            2.0.7.27   MDSTools
+    Function        Add-MDSCredential                       2.0.7.27   MDSTools
+    Function        Connect-MDSMsolService                  2.0.7.27   MDSTools
+    Function        Disable-MDSMsolLicenseServicePlan       2.0.7.27   MDSTools
+    Function        Enable-MDSMsolLicenseServicePlan        2.0.7.27   MDSTools
+    Function        Find-MDSUserName                        2.0.7.27   MDSTools
+    Function        Get-MDSADLockoutSource                  2.0.7.27   MDSTools
+    Function        Get-MDSConfiguration                    2.0.7.27   MDSTools
+    Function        Get-MDSCredential                       2.0.7.27   MDSTools
+    Function        Get-MDSExchServerFromLDAP               2.0.7.27   MDSTools
+    Function        Get-MDSForestADGroupMember              2.0.7.27   MDSTools
+    Function        Get-MDSMsolLicenseServicePlan           2.0.7.27   MDSTools
+    Function        Import-MDSExchOnline                    2.0.7.27   MDSTools
+    Function        Import-MDSExchOnprem                    2.0.7.27   MDSTools
+    Function        Import-MDSSkypeOnPrem                   2.0.7.27   MDSTools
+    Function        Remove-MDSCredential                    2.0.7.27   MDSTools
+    Function        Set-MDSConfiguration                    2.0.7.27   MDSTools
+    Function        Start-MDSADSyncSyncCycle                2.0.7.27   MDSTools
+    Function        Start-MDSADUC                           2.0.7.27   MDSTools
+    Function        Start-MDSExchMgmtConsole                2.0.7.27   MDSTools
+    Function        Start-MDSExplorer                       2.0.7.27   MDSTools
+    Function        Start-MDSGPMC                           2.0.7.27   MDSTools
+    Function        Start-MDSPowerShell                     2.0.7.27   MDSTools
+    Function        Start-MDSSitesAndServices               2.0.7.27   MDSTools
+    Function        Start-MDSWebBrowser                     2.0.7.27   MDSTools
+    Function        Test-MDSADAuthentication                2.0.7.27   MDSTools
+    Function        Update-MDSCredential                    2.0.7.27   MDSTools
 
 Documentation for each function is available with `Get-Help`.
 
