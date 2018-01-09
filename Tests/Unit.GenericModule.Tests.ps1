@@ -2,6 +2,10 @@ $projectRoot = Resolve-Path "$PSScriptRoot\.."
 $moduleRoot = Split-Path (Resolve-Path "$projectRoot\*\*.psd1")
 $moduleName = Split-Path $moduleRoot -Leaf
 
+Write-Host "projectRoot:  $projectRoot" -f cyan
+Write-Host "moduleRoot:  $moduleRoot" -f cyan
+Write-Host "moduleName:  $moduleName" -f cyan
+
 $ModuleManifestContent = Get-Content (Join-Path $moduleRoot "$moduleName.psd1")
 
 Describe "Generic Module Tests" -Tag UnitTest {
