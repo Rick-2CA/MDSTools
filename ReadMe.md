@@ -29,13 +29,13 @@ The module is available on the [PowerShell Gallery](https://www.powershellgaller
 
 Password storage has been moved from the machine location to the user location.  This means you'll need to copy your credential file to the new location or recreate your file.  Also updated to using v1.2 of the Configuration module which uses a folder called PowerShell instead of WindowsPowerShell.
 
-* Old location:  C:\Users\$($Env:UserName)\AppData\Local\WindowsPowerShell\MDSTools\MDSTools\MDSCredentials.xml
-* New location:  C:\Users\$($Env:UserName)\AppData\Local\PowerShell\MDSTools\MDSTools\MDSCredentials.xml
+* Old location:  C:\Users\\$($Env:UserName)\AppData\Local\WindowsPowerShell\MDSTools\MDSTools\MDSCredentials.xml
+* New location:  C:\Users\\$($Env:UserName)\AppData\Local\PowerShell\MDSTools\MDSTools\MDSCredentials.xml
 
 Configuration storage was also impacted by the folder change:
 
-* Old location:  C:\Users\$($Env:UserName)\AppData\Roaming\WindowsPowerShell\MDSTools\mdstools\Configuration.psd1
-* New location:  C:\Users\$($Env:UserName)\AppData\Roaming\PowerShell\MDSTools\mdstools\Configuration.psd1
+* Old location:  C:\Users\\$($Env:UserName)\AppData\Roaming\WindowsPowerShell\MDSTools\mdstools\Configuration.psd1
+* New location:  C:\Users\\$($Env:UserName)\AppData\Roaming\PowerShell\MDSTools\mdstools\Configuration.psd1
 
 ## Usage
 
