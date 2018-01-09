@@ -1,19 +1,21 @@
 $projectRoot = Resolve-Path "$PSScriptRoot\.."
 $moduleRoot = Split-Path (Resolve-Path "$projectRoot\*\*.psd1")
 $moduleName = Split-Path $moduleRoot -Leaf
+$modulePath = (Join-Path $moduleRoot "$moduleName.psd1")
 
 Write-Host "projectRoot:  $projectRoot" -f cyan
 Write-Host "moduleRoot:  $moduleRoot" -f cyan
 Write-Host "moduleName:  $moduleName" -f cyan
+Write-Host "ModulePath:  $ModulePath" -f cyan
 
-$ModuleManifestContent = Get-Content (Join-Path $moduleRoot "$moduleName.psd1")
+$ModuleManifestContent = Get-Content $modulePath
 
 Describe "Generic Module Tests" -Tag UnitTest {
     # Unload the module so it's loaded fresh for testing
     Remove-Module $ModuleName -ErrorAction SilentlyContinue
 
     # Import Module
-    $ModuleInformation = Import-Module (Join-Path $moduleRoot "$moduleName.psd1") -Force -PassThru
+    $ModuleInformation = Import-Module $modulePath -Force -PassThru -ErrorAction SilentlyContinue
     It "Module imported successfully" {
         $ModuleInformation.Name | Should -Be $moduleName
     }
