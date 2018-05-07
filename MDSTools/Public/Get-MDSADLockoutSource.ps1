@@ -20,6 +20,7 @@ Function Get-MDSADLockoutSource {
     Accepts a specific server to query assuming the metadata time is the event time for that server
     .NOTES
     Written by Rick A., December 2017
+
     #>
     [CmdletBinding(DefaultParameterSetName='None')]
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingPlainTextForPassword', '')]
@@ -100,31 +101,13 @@ Function Get-MDSADLockoutSource {
                     continue
                 }
 
-                $VerboseString = 'Querying AD metadata for {0}.' -f $ADUser.DistinguishedName
-                Write-Verbose $VerboseString
-                $MetaData = Get-ADReplicationAttributeMetadata -Server $Server -Object $ADUser.DistinguishedName |
-                    Where-Object {'lockoutTime' -eq $_.AttributeName} |
-                    Select-Object AttributeName,LastOriginatingChangeTime,LastOriginatingChangeDirectoryServerIdentity
-                $SourceDC = ($Metadata.LastOriginatingChangeDirectoryServerIdentity -Split "CN=")[2] -replace ','
-
-                If ($null -eq $MetaData.LastOriginatingChangeTime) {
-                    $ErrorString = 'There is no lockout time recorded for {0} in the AD metadata on {1}.' -f $ADuser.SamAccountName,$Server
-                    Write-Error $ErrorString
-                    continue
-                }
-
-                If ($null -eq $PSBoundParameters.Server) {
-                    $Server = $SourceDC
-                    $VerboseString = 'No server specified.  Using the LastOriginatingChangeDirectoryServerIdentity {0}.' -f $Server
-                    Write-Verbose $VerboseString
-                }
-
+                # Lockout:  'Microsoft-Windows-Security-Auditing', ID 4740
+                # Failure Event:  'Microsoft-Windows-Security-Auditing',ID 4771
                 $FilterHashtable = @{
                     LogName         = 'Security'
                     ID              = 4740
                     ProviderName    = 'Microsoft-Windows-Security-Auditing'
-                    StartTime       = $MetaData.LastOriginatingChangeTime
-                    EndTime         = $MetaData.LastOriginatingChangeTime.AddSeconds(1)
+                    Data            = $Name
                 }
                 $getWinEventSplat = @{
                     ComputerName    = $Server
@@ -146,7 +129,7 @@ Function Get-MDSADLockoutSource {
                     If($Event | Where-Object {$_.Properties[2].Value -match $ADUser.SID.Value}) {
                         [PSCustomObject] @{
                             AccountName     = $Name
-                            EventComputer   = $Server
+                            EventComputer   = $Event.Properties[4].Value
                             LockoutTime     = $Event.TimeCreated
                             LockoutSource   = $Event.Properties[1].Value
                         }
