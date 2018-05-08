@@ -15,7 +15,7 @@ Describe "Generic Module Tests" -Tag UnitTest {
     Remove-Module $ModuleName -ErrorAction SilentlyContinue
 
     # Import Module
-    $ModuleInformation = Import-Module $modulePath -Force -PassThru -ErrorAction SilentlyContinue
+    $ModuleInformation = Import-Module $modulePath -Force -PassThru
     It "Module imported successfully" {
         $ModuleInformation.Name | Should -Be $moduleName
     }
