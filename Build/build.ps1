@@ -20,13 +20,20 @@ ForEach ($Module in $Modules) {
                 Configuration {Install-Module $Module -Force -AllowClobber}
                 Default {Install-Module $Module -Force}
             }
-           
+
     }
      Import-Module $Module
 }
 
-$Path = (Resolve-Path $PSScriptRoot\..).Path
-Set-BuildEnvironment -Path $Path
+Try {
+    $Path = (Resolve-Path $PSScriptRoot\..).Path
+    Set-BuildEnvironment -Path $Path -Force -ErrorAction Stop
+}
+Catch {
+    Write-Error $PSItem
+    "Skipping build due to build setup error."
+    Exit
+}
 
 Invoke-psake -buildFile $PSScriptRoot\psake.ps1 -taskList $Task -nologo
 exit ([int](-not $psake.build_success))
