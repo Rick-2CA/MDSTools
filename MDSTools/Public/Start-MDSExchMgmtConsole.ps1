@@ -14,7 +14,7 @@ Function Start-MDSExchMgmtConsole {
 		.NOTES
 
 	#>
-	[cmdletbinding()]
+	[CmdletBinding()]
 	Param()
-	Start-Process "Exchange Management Console"
+	Start-Process 'Exchange Management Console'
 }

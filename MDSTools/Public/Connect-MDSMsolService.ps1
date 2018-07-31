@@ -24,52 +24,58 @@ Function Connect-MDSMsolService {
     .NOTES
 
 	#>
-	[cmdletbinding(DefaultParameterSetName="MDSCredential")]
+	[System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingPlainTextForPassword','')]
+	[System.Diagnostics.CodeAnalysis.SuppressMessage('PSUsePSCredentialType','')]
+
+	[CmdletBinding(DefaultParameterSetName='MDSCredential')]
 	Param (
-		[parameter(Position=0,ParameterSetName="MDSCredential")]
+		[parameter(Position=0,ParameterSetName='MDSCredential')]
+		[ValidateNotNullOrEmpty()]
 		[String]$MDSCredential,
 
-		[parameter(Position=0,ParameterSetName="Credential")]
+		[parameter(Position=0,ParameterSetName='Credential')]
 		[ValidateNotNullOrEmpty()]
 		[System.Management.Automation.CredentialAttribute()]
 		$Credential,
 
-		[parameter(Position=0,ParameterSetName="CurrentCredential")]
+		[parameter(Position=0,ParameterSetName='CurrentCredential')]
 		[switch]$CurrentCredential
 	)
-	
+
 	Begin {}
-	
 	Process {
-		# $MDSCredential is allowed to be null to allow the cmdlet to be called without parameters resulting
-		# in a prompt for credentials.  $Credential has validation and handles the credential prompt ahead
-		# of Connect-MsolService being called.
-
-		If ($PsCmdlet.ParameterSetName -eq "MDSCredential" -and -not [string]::IsNullOrEmpty($MDSCredential)) {
-			Try {$Credential = Get-MDSCredential -Name $MDSCredential -ErrorAction Stop}
-			Catch {
-				$PsCmdlet.ThrowTerminatingError($PSItem)
+		Try {
+			$Parameters = @{
+				ErrorAction = 'Stop'
 			}
-		}
 
-		# If Credentials were found execute Connect-MsolService with parameters
-		If (-not [string]::IsNullOrEmpty($Credential)) {
-			$Parameters = @{'Credential' = $Credential}
-			Write-Verbose "Connecting to MS Online as $($Credential.UserName)."
+			Switch ($PSCmdlet.ParameterSetName) {
+				'Credential' {
+					$Parameters.Add('Credential',$Credential)
+					Write-Verbose "Connect-MDSMsolService using credential $($Credential.Username)"
+					Continue
+				}
+				'CurrentCredential' {
+					$Parameters.Add('CurrentCredential',$true)
+					Write-Verbose "Connect-MDSMsolService using current credential"
+					Continue
+				}
+				'MDSCredential' {
+					If ($PSBoundParameters.MDSCredential) {
+						$Credential = Get-MDSCredential -Name $MDSCredential -ErrorAction Stop
+						$Parameters.Add('Credential',$Credential)
+						Write-Verbose "Connect-MDSMsolService using credential $($Credential.Username)"
+					}
+					Continue
+				}
+				Default {}
+			}
+
 			Connect-MsolService @Parameters
-			Return
 		}
-		
-		# Use current recredentials
-		If ($PsCmdlet.ParameterSetName -eq "CurrentCredential") {
-			Write-Verbose "Connecting to MS Online with the currently logged on user."
-			Connect-MsolService -CurrentCredential
-			Return
+		Catch {
+			Write-Error $PSItem
 		}
-
-		# No parameters results in Connect-MsolService prompting for credentials.
-		Connect-MsolService
 	}
-	
 	End {}
 }

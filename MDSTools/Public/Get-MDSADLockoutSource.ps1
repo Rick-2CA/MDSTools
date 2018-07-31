@@ -23,8 +23,8 @@ Function Get-MDSADLockoutSource {
 
     #>
     [CmdletBinding(DefaultParameterSetName='None')]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingPlainTextForPassword', '')]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUsePSCredentialType', '')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingPlainTextForPassword','')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUsePSCredentialType','')]
 
     param(
         [Parameter(
@@ -56,20 +56,15 @@ Function Get-MDSADLockoutSource {
     #requires -Module ActiveDirectory
 	begin {}
 	process	{
-        # MDSCredentials
-        If ($PsCmdlet.ParameterSetName -eq "MDSCredential" -and -not [string]::IsNullOrEmpty($MDSCredential)) {
-            Try {
-                $Credential = Get-MDSCredential -Name $MDSCredential
-            }
-            Catch {
-                $PsCmdlet.ThrowTerminatingError($PSItem)
-            }
-        }
-
         Try {
+            # MDSCredential
+			If ($PSBoundParameters.MDSCredential) {
+				$Credential = Get-MDSCredential -Name $MDSCredential -ErrorAction Stop
+			}
+
             If ($null -eq $PSBoundParameters.Server) {
-                $PDCEmulator = Get-ADDomain -ErrorAction Stop | Select-Object -Expand PDCEmulator
-                $VerboseString = 'No server specified.  Using the PDCEmulator {0}.' -f $PDCEmulator
+                $Server = Get-ADDomain -ErrorAction Stop | Select-Object -Expand PDCEmulator
+                $VerboseString = 'No server specified.  Using the PDCEmulator {0}.' -f $Server
                 Write-Verbose $VerboseString
             }
         }
@@ -80,10 +75,6 @@ Function Get-MDSADLockoutSource {
         ForEach ($Name in $SamAccountName) {
             Try {
                 $Events = $ADUser = $null
-
-                If ($null -eq $PSBoundParameters.Server) {
-                    $Server = $PDCEmulator
-                }
 
                 $VerboseString = 'Performing AD query for {0}.' -f $Name
                 Write-Verbose $VerboseString
@@ -98,7 +89,7 @@ Function Get-MDSADLockoutSource {
                 If ($null -eq $ADUser) {
                     $ErrorString = 'Cannot find object with samaccountname: {0}' -f $SamAccountName
                     Write-Error $ErrorString
-                    continue
+                    Continue
                 }
 
                 # Lockout:  'Microsoft-Windows-Security-Auditing', ID 4740
@@ -115,8 +106,12 @@ Function Get-MDSADLockoutSource {
                     ErrorAction     = 'Stop'
                     Verbose         = $False
                 }
-                If ($Credential) {[void]$getWinEventSplat.Add('Credential',$Credential)}
-                Try {[array]$Events = Get-WinEvent @getWinEventSplat}
+                If ($Credential) {
+                    [void]$getWinEventSplat.Add('Credential',$Credential)
+                }
+                Try {
+                    [array]$Events = Get-WinEvent @getWinEventSplat
+                }
                 Catch {
                     Write-Error $PSItem
                     Continue

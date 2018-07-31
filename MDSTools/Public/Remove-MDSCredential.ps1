@@ -28,17 +28,14 @@ Function Remove-MDSCredential {
         New-DynamicParam -Name Name -ValidateSet $Options -Position 0 -ParameterSetName Name
 	}
 
-	Begin {$Name = $PSBoundParameters.Name}
-	
+	Begin {}
 	Process {
-        # Get a hash table of the credential store
-		Try {$Hash = Get-MDSCredential -SortByName:$false -ErrorAction Stop}
-        Catch {
-            $PSCmdlet.ThrowTerminatingError($PSItem)
-        }
-
-        # Confirm the removal name exists and remove it from the ash
         Try {
+            # Get a hash table of the credential store
+            $Hash = Get-MDSCredential -SortByName:$false -ErrorAction Stop
+
+            $Name = $PSBoundParameters.Name
+            # Confirm the removal name exists and remove it from the ash
             If ($Hash[$Name]) {
                 If ($PSCmdlet.ShouldProcess($Name,"Remove credential record")) {
                     $Hash.Remove($Name)
@@ -50,17 +47,14 @@ Function Remove-MDSCredential {
                 Write-Error -Message $Message -ErrorAction Stop -Exception ([System.Management.Automation.MethodInvocationException]::new())
                 Continue
             }
-            
+
+            # Update the store file
+            Write-Verbose "Updating file $CredentialFilePath"
+            $Hash | Export-CliXML $CredentialFilePath
         }
         Catch {
             Write-Error $PSItem
-            Continue
         }
-
-		# Update the store file
-        Write-Verbose "Updating file $CredentialFilePath"
-		$Hash | Export-CliXML $CredentialFilePath
 	}
-	
 	End {}
 }

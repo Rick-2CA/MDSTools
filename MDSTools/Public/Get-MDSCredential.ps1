@@ -49,42 +49,41 @@ Function Get-MDSCredential {
 		}
 	}
 
-	Begin {
-		$Name = $PSBoundParameters.Name
-	}
-	
+	Begin {}
 	Process {
-		If ((Test-Path $CredentialFilePath) -eq $False) {
-			Write-Warning "Please use 'Add-MDSCredential' to populate your credential store.  The store file will be saved in $CredentialFilePath."
-			Return
-		}
-		
 		Try {
+			If ((Test-Path $CredentialFilePath) -eq $False) {
+				Write-Warning "Please use 'Add-MDSCredential' to populate your credential store.  The store file will be saved in $CredentialFilePath."
+				Return
+			}
+
 			$CredentialFile = Import-CliXML $CredentialFilePath -ErrorAction Stop
-			Write-Verbose "Found file $CredentialFilePath"
+
+			# Credential object output
+			If ($PSBoundParameters.Name) {
+				$Name = $PSBoundParameters.Name
+				If ($CredentialFile[$Name]) {
+					Write-Verbose "MDSCredential `'$Name`' found in store $CredentialFilePath"
+					$MDSCredentialEntry = $CredentialFile[$Name]
+				}
+				Else {
+					Throw "MDSCredential not found for $($Name)"
+				}
+
+				New-Object -TypeName System.Management.Automation.PsCredential -ArgumentList $MDSCredentialEntry[0],($MDSCredentialEntry[1] | ConvertTo-SecureString)
+			}
+			# Array output for human consumption
+			ElseIf ($PSCmdlet.ParameterSetName -eq 'Default' -or $SortByName -eq $True) {
+				$CredentialFile.GetEnumerator() | Sort-Object Name
+			}
+			# Hash output for Add/Remove functions
+			Else {
+				$CredentialFile
+			}
 		}
 		Catch {
-			$PSCmdlet.ThrowTerminatingError($PSItem)
+			Write-Error $PSItem
 		}
-		
-		If ($Name) {
-			If ($CredentialFile[$Name]) {
-				Write-Verbose "MDSCredential found for $($Name)"
-				$MDSCredentialEntry = $CredentialFile[$Name]
-			}
-			Else {
-				Return Write-Error -Message "MDSCredential not found for $($Name)"
-			}
-
-			Return New-Object -TypeName System.Management.Automation.PsCredential -ArgumentList $MDSCredentialEntry[0],($MDSCredentialEntry[1] | ConvertTo-SecureString)
-		}
-		
-		If ($PSCmdlet.ParameterSetName -eq 'Default' -or $SortByName -eq $True) {
-			Return $CredentialFile.GetEnumerator() | Sort-Object Name
-		}
-
-		Return $CredentialFile
 	}
-	
 	End {}
 }

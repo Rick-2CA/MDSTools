@@ -15,22 +15,21 @@ Function Get-MDSExchServerFromLDAP {
 		Returns a single random server from the list.  May be used with or without -Role
 
 	.EXAMPLE
-		Get-ExchangeServerFromLDAP
+		Get-MDSExchServerFromLDAP
 
 		Returns all Exchange Servers in LDAP
 
 	.EXAMPLE
-	   Get-ExchangeServerFromLDAP -Role ClientAccess
+	   Get-MDSExchServerFromLDAP -Role ClientAccess
 
 		Returns all Client Access Servers in LDAP
 
 	.EXAMPLE
-		Get-ExchangeServerFromLDAP -Role HubTransport -Random
+		Get-MDSExchServerFromLDAP -Role HubTransport -Random
 
 		Returns a random Hub Transport Server in LDAP
 
 	.NOTES
-		Name: Get-ExchangeServerFromLDAP
 		Author: Rick A
 		Based on source:  http://mikepfeiffer.net/2010/04/find-exchange-servers-in-the-local-active-directory-site-using-powershell/
 	#>
@@ -40,10 +39,11 @@ Function Get-MDSExchServerFromLDAP {
 		[parameter()]
 		[ValidateSet('Mailbox','ClientAccess','UnifiedMessaging','HubTransport','EdgeTransport',ignorecase=$True)]
 		[string]$Role,
+
 		[parameter()]
 		[switch]$Random
 	)
-	
+
 	Begin {
 		If ($Role) {
 			Switch ($Role) {
@@ -54,7 +54,7 @@ Function Get-MDSExchServerFromLDAP {
 				EdgeTransport		{$ServerRoleInteger = 64;continue}
 			}
 		}
-		
+
 		$RoleAbbreviation = @{
 			2  = "MB"
 			4  = "CAS"
@@ -65,32 +65,41 @@ Function Get-MDSExchServerFromLDAP {
 	}
 
 	Process {
-		$configNC=([ADSI]"LDAP://RootDse").configurationNamingContext
-		$search = new-object DirectoryServices.DirectorySearcher([ADSI]"LDAP://$configNC")
-		$objectClass = "objectClass=msExchExchangeServer"
-		$version = "versionNumber>=1937801568"
-		$search.Filter = "(&($objectClass)($version))"
-		$search.PageSize = 1000
-		[void] $search.PropertiesToLoad.AddRange(("name","msexchcurrentserverroles","networkaddress"))
-		$ServerList = $search.FindAll() | %{
-			$ServerRoles = $_.Properties.msexchcurrentserverroles[0]
-			$RolesHumanReadable = ($RoleAbbreviation.keys | ?{$_ -band $ServerRoles} | %{$RoleAbbreviation.Get_Item($_)}) -join ","
-			New-Object PSObject -Property @{
-				Name = $_.Properties.name[0]
-				FQDN = $_.Properties.networkaddress |
-					%{if ($_ -match "ncacn_ip_tcp") {$_.split(":")[1]}}
-				msexchcurrentserverroles = $_.Properties.msexchcurrentserverroles[0]
-				Roles = $RolesHumanReadable
-			}
-		} | Sort Name | Select Name,FQDN,msexchcurrentserverroles,Roles
+		Try {
+			$configNC = ([ADSI]"LDAP://RootDse").configurationNamingContext
+			$search = New-Object DirectoryServices.DirectorySearcher([ADSI]"LDAP://$configNC")
+			$objectClass = "objectClass=msExchExchangeServer"
+			$version = "versionNumber>=1937801568"
+			$search.Filter = "(&($objectClass)($version))"
+			$search.PageSize = 1000
+			[void] $search.PropertiesToLoad.AddRange(("name","msexchcurrentserverroles","networkaddress"))
+			$ServerList = $search.FindAll() | ForEach-Object{
+				$ServerRoles = $_.Properties.msexchcurrentserverroles[0]
+				$RolesHumanReadable = (
+					$RoleAbbreviation.keys |
+						Where-Object {$_ -band $ServerRoles} |
+						ForEach-Object{$RoleAbbreviation.Get_Item($_)}
+				) -join ","
+				New-Object PSObject -Property @{
+					Name = $_.Properties.name[0]
+					FQDN = $_.Properties.networkaddress |
+					ForEach-Object{if ($_ -match "ncacn_ip_tcp") {$_.split(":")[1]}}
+					msexchcurrentserverroles = $_.Properties.msexchcurrentserverroles[0]
+					Roles = $RolesHumanReadable
+				}
+			} | Sort-Object Name | Select-Object Name,FQDN,msexchcurrentserverroles,Roles
 
-		If ($ServerRoleInteger) {
-			$Output = $ServerList | Where({($_.msexchcurrentserverroles -band $ServerRoleInteger) -eq $ServerRoleInteger})
+			If ($ServerRoleInteger) {
+				$Output = $ServerList | Where-Object {($_.msexchcurrentserverroles -band $ServerRoleInteger) -eq $ServerRoleInteger}
+			}
+			Else {$Output = $ServerList}
+
+			If ($Random) {$Output | Select-Object Name,FQDN,Roles | Get-Random}
+			Else {$Output | Select-Object Name,FQDN,Roles}
 		}
-		Else {$Output = $ServerList}
-		
-		If ($Random) {$Output | Select Name,FQDN,Roles | Get-Random}
-		Else {$Output | Select Name,FQDN,Roles}
+		Catch {
+			Write-Error $PSItem
+		}
 	}
 }
 
@@ -111,7 +120,7 @@ Until ($TestConnection -ne $False)
 Do {
 	$ExchServer = Get-ExchangeServerFromLDAP -Role HubTransport -Random
 	$TestConnection = $False
-	Try {$TestConnection = Test-Connection $ExchServer.FQDN -Count 1 -ErrorAction Stop}	
+	Try {$TestConnection = Test-Connection $ExchServer.FQDN -Count 1 -ErrorAction Stop}
 	Catch {}
 
 }

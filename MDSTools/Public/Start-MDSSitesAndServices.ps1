@@ -23,50 +23,60 @@ Function Start-MDSSitesAndServices {
 
 		.NOTES
 
-	#>
-	[cmdletbinding(DefaultParameterSetName="MDSCredential")]
+		#>
+
+	#requires -Module ActiveDirectory
+
+	[System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingPlainTextForPassword','')]
+	[System.Diagnostics.CodeAnalysis.SuppressMessage('PSUsePSCredentialType','')]
+
+	[CmdletBinding(
+		SupportsShouldProcess,
+		DefaultParameterSetName='MDSCredential'
+	)]
     Param(
-		[parameter(Position=0,ParameterSetName="MDSCredential")]
+		[parameter(
+			Position=0,
+			ParameterSetName='MDSCredential'
+		)]
+		[ValidateNotNullOrEmpty()]
 		[String]$MDSCredential,
 
-		[parameter(Position=0,ParameterSetName="Credential")]
+		[parameter(
+			Position=0,
+			ParameterSetName='Credential'
+		)]
 		[ValidateNotNullOrEmpty()]
 		[System.Management.Automation.CredentialAttribute()]
 		$Credential
     )
-	
-#requires -Module ActiveDirectory
 
 	Begin {}
-	
 	Process {
-		$ArgumentList = 'Start-Process -FilePath $env:SystemRoot\System32\mmc.exe -ArgumentList $env:SystemRoot\System32\dssite.msc -Verb RunAs'
-		$Parameters = @{
-			'ArgumentList' = $ArgumentList
-		}		
-		
-		# If $MDSCredential is defined lookup the credentials
-		If ($PsCmdlet.ParameterSetName -eq "MDSCredential" -and -not [string]::IsNullOrEmpty($MDSCredential)) {
-			Try {
-				$Credential = Get-MDSCredential -Name $MDSCredential
+		Try {
+			$ArgumentList = 'Start-Process -FilePath $env:SystemRoot\System32\mmc.exe -ArgumentList $env:SystemRoot\System32\dssite.msc -Verb RunAs'
+			$Parameters = @{
+				'ArgumentList' = $ArgumentList
 			}
-			Catch {
-				$PsCmdlet.ThrowTerminatingError($PSItem)
-			}
-		}
-		# If $MDSCredential is not defined run the process as the current user
-		ElseIf ($PsCmdlet.ParameterSetName -eq "MDSCredential" -and [string]::IsNullOrEmpty($MDSCredential)) {
-			Write-Verbose "Opening AD Sites & Services for the current user."
-			Return Start-Process dssite.msc
-		}
 
-		# Add credentials to parameter list
-		If ($null -ne $Credential) {
-			$Parameters.Add("Credential",$Credential)
+			# MDSCredential
+			If ($PSBoundParameters.MDSCredential) {
+				$Credential = Get-MDSCredential -Name $MDSCredential -ErrorAction Stop
+			}
+
+			# Add credentials to parameter list
+			If ($null -ne $Credential) {
+				$Parameters.Add('Credential',$Credential)
+			}
+
+			$ShouldProcessTarget = $Credential.UserName
+			If ($PSCmdlet.ShouldProcess($ShouldProcessTarget,$MyInvocation.MyCommand)) {
+				Start-Process PowerShell @Parameters -WindowStyle Hidden
+			}
 		}
-		
-		Write-Verbose "Opening Opening AD Sites & Services for $($Credential.UserName)."
-		Start-Process PowerShell @Parameters -WindowStyle Hidden
+		Catch {
+			Write-Error $PSItem
+		}
 	}
 	End {}
 }

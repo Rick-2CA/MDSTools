@@ -6,7 +6,7 @@ Function Start-MDSExplorer {
 		.DESCRIPTION
 		Open Windows Explorer as the current user, with a stored MDSCredential, or prompt for a credential.
 
-		This function has had mixed success.  Sometimes the window simply doesn't open.  It often won't open to the path specified.  
+		This function has had mixed success.  Sometimes the window simply doesn't open.  It often won't open to the path specified.
 
 		.EXAMPLE
 		Start-MDSExplorer
@@ -26,66 +26,62 @@ Function Start-MDSExplorer {
 		.NOTES
 
 	#>
+	[System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingPlainTextForPassword','')]
+	[System.Diagnostics.CodeAnalysis.SuppressMessage('PSUsePSCredentialType','')]
+
 	[CmdletBinding(
 		SupportsShouldProcess,
-		DefaultParameterSetName="MDSCredential"
+		DefaultParameterSetName='MDSCredential'
 	)]
 	Param(
-		[parameter(Position=0,ParameterSetName="MDSCredential")]
+		[parameter(Position=0,ParameterSetName='MDSCredential')]
+		[ValidateNotNullOrEmpty()]
 		[String]$MDSCredential,
 
-		[parameter(Position=0,ParameterSetName="Credential")]
+		[parameter(Position=0,ParameterSetName='Credential')]
 		[ValidateNotNullOrEmpty()]
 		[System.Management.Automation.CredentialAttribute()]
 		$Credential,
 
-		[parameter(Position=1, ParameterSetName="MDSCredential")]
-		[parameter(Position=1, ParameterSetName="Credential")]
+		[parameter(Position=1, ParameterSetName='MDSCredential')]
+		[parameter(Position=1, ParameterSetName='Credential')]
 		[string]$Path='Documents'
 	)
-	
+
 	Begin {}
 	Process {
-		# Variable for storing parameters
-		$Parameters = @{}
-		
-		# Capture MDS Credentials
-		If ($PsCmdlet.ParameterSetName -eq "MDSCredential" -and -not [string]::IsNullOrEmpty($MDSCredential)) {
-			Try {
-				$Credential = Get-MDSCredential -Name $MDSCredential
+		Try {
+			# Variable for storing parameters
+			$Parameters = @{
+				ErrorAction = 'Stop'
 			}
-			Catch {
-				$PsCmdlet.ThrowTerminatingError($PSItem)
+
+			# MDSCredential
+			If ($PSBoundParameters.MDSCredential) {
+				$Credential = Get-MDSCredential -Name $MDSCredential -ErrorAction Stop
 			}
-		}
-		ElseIf ($PsCmdlet.ParameterSetName -eq "MDSCredential" -and [string]::IsNullOrEmpty($MDSCredential)) {
-			Write-Verbose "Opening Explorer for the current user."
-			Return Start-Process Explorer
-		}
 
-		# Add credentials to parameter list
-		If ($null -ne $Credential) {
-			$Parameters.Add("Credential",$Credential)
-		}
-		
-		If (-not ([string]::IsNullOrEmpty($Path))) {
-			$Parameters.Add("ArgumentList",$Path)
-		}
+			# Add credentials to parameter list
+			If ($null -ne $Credential) {
+				$Parameters.Add('Credential',$Credential)
+			}
 
-		# For use in Confirm & WhatIf
-		$ShouldProcessTarget = "Username:  {0}, Path:  {1}" -f $Credential.UserName,$Path
+			# Add path to parameter list
+			If (-not ([string]::IsNullOrEmpty($Path))) {
+				$Parameters.Add('ArgumentList',$Path)
+			}
 
-		# Execute Explorer
-		If ($PSCmdlet.ShouldProcess($ShouldProcessTarget,$MyInvocation.MyCommand)) {
-			Try {
-				Write-Verbose "Opening Explorer for $($Credential.UserName)."
+			# For use in ShouldProcess
+			$ShouldProcessTarget = "{0} with path {1}" -f $Credential.UserName,$Path
+
+			# Execute Explorer
+			If ($PSCmdlet.ShouldProcess($ShouldProcessTarget,$MyInvocation.MyCommand)) {
 				Start-Process Explorer @Parameters -LoadUserProfile
 			}
-			Catch {
-				$PsCmdlet.ThrowTerminatingError($PSItem)
-			}
+		}
+		Catch {
+			Write-Error $PSItem
 		}
 	}
-	
 	End {}
 }

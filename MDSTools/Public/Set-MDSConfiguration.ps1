@@ -32,21 +32,28 @@ function Set-MDSConfiguration {
     )
     begin {}
     process {
-        $Configuration = Import-Configuration
-        If ($null -ne $Configuration) {
-            If ($Configuration[$Name]) {
-                Write-Verbose 'Removing old value'
-                $Configuration.Remove($Name)
-            }
+        Try {
+            $Configuration = Import-Configuration -ErrorAction Stop
+            If ($null -ne $Configuration) {
+                If ($Configuration[$Name]) {
+                    Write-Verbose 'Removing old value'
+                    $Configuration.Remove($Name)
+                }
 
-            Write-Verbose 'Adding old value'
-            $Configuration.Add($Name,$Value)
-            Get-Module MDSTools | Export-Configuration $Configuration -Scope Enterprise
+                Write-Verbose 'Adding old value'
+                $Configuration.Add($Name,$Value)
+                Get-Module MDSTools -ErrorAction Stop |
+                    Export-Configuration $Configuration -Scope Enterprise -ErrorAction Stop
+            }
+            Else {
+                Write-Verbose "Exporting new value"
+                $FirstEntry = @{$Name = $Value}
+                Get-Module MDSTools -ErrorAction Stop |
+                    Export-Configuration $FirstEntry -Scope Enterprise -ErrorAction Stop
+            }
         }
-        Else {
-            Write-Verbose "Exporting new value"
-            $FirstEntry = @{$Name = $Value}
-            Get-Module MDSTools | Export-Configuration $FirstEntry -Scope Enterprise
+        Catch {
+            Write-Error $PSItem
         }
     }
     end {}

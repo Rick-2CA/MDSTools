@@ -25,38 +25,31 @@ Function Update-MDSCredential {
         New-DynamicParam -Name Name -ValidateSet $Options -Position 0 -ParameterSetName Name
 	}
 
-	Begin {$Name = $PSBoundParameters.Name}
-	
+	Begin {}
+
 	Process {
-		Try {$Hash = Get-MDSCredential -SortByName:$false -ErrorAction Stop}
+        Try {
+            $Hash = Get-MDSCredential -SortByName:$false -ErrorAction Stop
+
+            $Credentials = Get-Credential -ErrorAction Stop
+            $Username = $Credentials.UserName
+            $Password = $Credentials.Password | ConvertFrom-SecureString
+
+            If ($Hash[$PSBoundParameters.Name]) {
+                $Hash.Remove($PSBoundParameters.Name)
+                $Hash.Add($PSBoundParameters.Name,@($UserName,$Password))
+                $Hash | Export-CliXML $CredentialFilePath
+                Write-Verbose "Updated credential record $($PSBoundParameters.Name)"
+            }
+            Else {
+                $Message = "A record for {0} does not exist." -f $Object
+                Write-Error -Message $Message -ErrorAction Stop -Exception ([System.Management.Automation.MethodInvocationException]::new())
+            }
+        }
         Catch {
-            $PSCmdlet.ThrowTerminatingError($PSItem)
+            Write-Error $PSItem
         }
-
-        Try {$Credentials = Get-Credential -ErrorAction Stop}
-        Catch {$PSCmdlet.ThrowTerminatingError($PSItem)}
-        $Username = $Credentials.UserName
-        $Password = $Credentials.Password | ConvertFrom-SecureString
-
-        If ($Hash[$Name]) {
-            Try { 
-                $Hash.Remove($Name)
-                $Hash.Add($Name,@($UserName,$Password))
-                Write-Verbose "Updated credential record $($Name)"
-            }
-            Catch {
-                $PSCmdlet.ThrowTerminatingError($PSItem)
-            }
-        }
-        Else {
-            $Message = "A record for {0} does not exist." -f $Object
-             Write-Error -Message $Message -ErrorAction Stop -Exception ([System.Management.Automation.MethodInvocationException]::new())
-             Return
-        }
-        
-        Write-Verbose "Updating file $CredentialFilePath"
-		$Hash | Export-CliXML $CredentialFilePath
 	}
-	
+
 	End {}
 }

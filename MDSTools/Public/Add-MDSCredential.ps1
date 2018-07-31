@@ -23,18 +23,23 @@ Function Add-MDSCredential {
 	Param (
 		[parameter(Position=0, Mandatory=$True)]
 		[ValidateNotNullOrEmpty()]
-		[string]$Name, 
-		
+		[string]$Name,
+
 		[Parameter()]
 		[string]$UserName
 	)
 
 	Begin {
-		$Hash = Get-MDSCredential -SortByName:$false
+		Try {
+			$Hash = Get-MDSCredential -SortByName:$false -ErrorAction Stop
+		}
+		Catch {
+			$PSCmdlet.ThrowTerminatingError($PSItem)
+		}
 		If (-not $Hash) {$Hash = @{}}
 	}
-	
 	Process {
+		Try {
 			$getCredentialSplat = @{
 				Message 	= "Credentials will be stored as $Name in the MDSTools credential store"
 				ErrorAction = 'Stop'
@@ -42,32 +47,22 @@ Function Add-MDSCredential {
 			If ($null -ne $PSBoundParameters.UserName) {
 				$getCredentialSplat.Add('UserName',$UserName)
 			}
-			Try {
-				
-				$Credentials = Get-Credential @getCredentialSplat
-			}
-			Catch {$PSCmdlet.ThrowTerminatingError($PSItem)}
+			$Credentials = Get-Credential @getCredentialSplat
 			$Username = $Credentials.UserName
 			$Password = $Credentials.Password | ConvertFrom-SecureString
 
-            Try {
-                $Hash.Add($Name,@($UserName,$Password))
-				$Username = $Password = $null
-                Write-Verbose "Added credential record $($Name)"
-            }
-            Catch [System.Management.Automation.MethodInvocationException] {
-                $Message = "A record for {0} already exists.  Use Update-MDSCredential to edit a record." -f $Name
-                Write-Error -Message $Message -ErrorAction Stop -Exception ([System.Management.Automation.MethodInvocationException]::new())
-            }
-            Catch {
-                $PSCmdlet.ThrowTerminatingError($PSItem)
-                Return
-            }
-		
-		Write-Verbose "Updating file $CredentialFilePath"
-		$Hash | Export-CliXML $CredentialFilePath
-		
+			$Hash.Add($PSBoundParameters.Name,@($UserName,$Password))
+			$Username = $Password = $null
+			Write-Verbose "Added credential record $($Name)"
+			$Hash | Export-CliXML $CredentialFilePath
+		}
+		Catch [System.Management.Automation.MethodInvocationException] {
+			$Message = "A record for {0} already exists.  Use Update-MDSCredential to edit a record." -f $Name
+			Write-Error -Message $Message -ErrorAction Stop -Exception ([System.Management.Automation.MethodInvocationException]::new())
+		}
+		Catch {
+			Write-Error $PSItem
+		}
 	}
-	
 	End {}
 }

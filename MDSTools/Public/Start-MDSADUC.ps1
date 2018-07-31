@@ -24,49 +24,51 @@ Function Start-MDSADUC {
 		.NOTES
 
 	#>
-	[cmdletbinding(DefaultParameterSetName="MDSCredential")]
+	[System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingPlainTextForPassword','')]
+	[System.Diagnostics.CodeAnalysis.SuppressMessage('PSUsePSCredentialType','')]
+
+	#requires -Module ActiveDirectory
+
+	[CmdletBinding(
+		SupportsShouldProcess,
+		DefaultParameterSetName='MDSCredential'
+	)]
     Param(
-		[parameter(Position=0,ParameterSetName="MDSCredential")]
+		[parameter(Position=0,ParameterSetName='MDSCredential')]
 		[String]$MDSCredential,
 
-		[parameter(Position=0,ParameterSetName="Credential")]
+		[parameter(Position=0,ParameterSetName='Credential')]
 		[ValidateNotNullOrEmpty()]
 		[System.Management.Automation.CredentialAttribute()]
 		$Credential
     )
 
-#requires -Module ActiveDirectory
-
 	Begin {}
-	
 	Process {
-		$ArgumentList = 'Start-Process -FilePath $env:SystemRoot\System32\mmc.exe -ArgumentList $env:SystemRoot\System32\dsa.msc -Verb RunAs'
-		$Parameters = @{
-			'ArgumentList' = $ArgumentList
-		}		
-		
-		# Capture MDS Credentials
-		If ($PsCmdlet.ParameterSetName -eq "MDSCredential" -and -not [string]::IsNullOrEmpty($MDSCredential)) {
-			Try {
+		Try {
+			$ArgumentList = 'Start-Process -FilePath $env:SystemRoot\System32\mmc.exe -ArgumentList $env:SystemRoot\System32\dsa.msc -Verb RunAs'
+			$Parameters = @{
+				ArgumentList = $ArgumentList
+				ErrorAction  = 'Stop'
+			}
+
+			# Capture MDS Credentials
+			If ($PsCmdlet.ParameterSetName -eq 'MDSCredential' -and -not [string]::IsNullOrEmpty($MDSCredential)) {
 				$Credential = Get-MDSCredential -Name $MDSCredential
 			}
-			Catch {
-				$PsCmdlet.ThrowTerminatingError($PSItem)
+
+			# Add credentials to parameter list
+			If ($null -ne $Credential) {
+				$Parameters.Add('Credential',$Credential)
+			}
+
+			If ($PSCmdlet.ShouldProcess($ShouldProcessTarget,$MyInvocation.MyCommand)) {
+				Start-Process PowerShell @Parameters -WindowStyle Hidden
 			}
 		}
-		ElseIf ($PsCmdlet.ParameterSetName -eq "MDSCredential" -and [string]::IsNullOrEmpty($MDSCredential)) {
-			Write-Verbose "Opening AD Users & Computers for the current user."
-			Return Start-Process dsa.msc
+		Catch {
+			Write-Error $PSItem
 		}
-
-		# Add credentials to parameter list
-		If ($null -ne $Credential) {
-			$Parameters.Add("Credential",$Credential)
-		}
-		
-		Write-Verbose "Opening AD Users & Computers for $($Credential.UserName)."
-		Start-Process PowerShell @Parameters -WindowStyle Hidden
 	}
-	
-	End{}
+	End {}
 }

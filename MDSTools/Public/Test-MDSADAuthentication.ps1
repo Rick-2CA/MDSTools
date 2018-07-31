@@ -20,6 +20,12 @@ Function Test-MDSADAuthentication {
 	The Confirm parameter is prompted by default due to the chance of locking out accounts.
 
 	#>
+
+	#requires -Module ActiveDirectory
+
+	[System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingPlainTextForPassword', '')]
+	[System.Diagnostics.CodeAnalysis.SuppressMessage('PSUsePSCredentialType', '')]
+
 	[CmdletBinding(
 		SupportsShouldProcess=$True,
 		ConfirmImpact='High'
@@ -31,40 +37,22 @@ Function Test-MDSADAuthentication {
 		[System.Management.Automation.CredentialAttribute()]
 		$Credential,
 
-		[parameter(position=1)]
+		[parameter(Position=1)]
 		$DomainController
 	)
 
-#requires -Module ActiveDirectory
-
-	If ($null -ne $PSBoundParameters.DomainController) {
-		Try {$DomainControllerDN = Get-ADDomainController $DomainController -ErrorAction Stop |
-				Select-Object -ExpandProperty ComputerObjectDN}
-		Catch  {
-			$PSCmdlet.ThrowTerminatingError($PSItem)
+	Try {
+		If ($null -ne $PSBoundParameters.DomainController) {
+			$DomainControllerDN = Get-ADDomainController $DomainController -ErrorAction Stop |
+				Select-Object -ExpandProperty ComputerObjectDN
+			$LDAPPath = "LDAP://{0}" -f $DomainControllerDN
 		}
-		$LDAPPath = "LDAP://$($DomainControllerDN)"
-	}
 
-	If ($PSCmdlet.ShouldProcess($Credential.UserName,"Test-MDSADAuthentication")) {
-		(New-Object DirectoryServices.DirectoryEntry "$($LDAPPath)",$Credential.UserName,$Credential.GetNetworkCredential().Password).psbase.name -ne $null
+		If ($PSCmdlet.ShouldProcess($Credential.UserName,$MyInvocation.MyCommand)) {
+			$null -ne (New-Object DirectoryServices.DirectoryEntry "$($LDAPPath)",$Credential.UserName,$Credential.GetNetworkCredential().Password).psbase.name
+		}
+	}
+	Catch {
+		Write-Error $PSItem
 	}
 }
-
-<# 
-
-$cred = Get-Credential #Read credentials
-$username = $cred.username
-$password = $cred.GetNetworkCredential().password
-  
-$Credential = Get-Credential
-$Domain = $Credential.GetNetworkCredential().Domain 
-[System.Reflection.Assembly]::LoadWithPartialName("System.DirectoryServices.AccountManagement") 
-$principalContext = New-Object System.DirectoryServices.AccountManagement.PrincipalContext(
-    [System.DirectoryServices.AccountManagement.ContextType]::Domain, $Domain
-) 
-$networkCredential = $Credential.GetNetworkCredential() 
-$principalContext.ValidateCredentials( 
-    $networkCredential.UserName, $networkCredential.Password 
-)
-#>

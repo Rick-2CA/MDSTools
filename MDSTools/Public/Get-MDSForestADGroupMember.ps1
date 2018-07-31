@@ -21,13 +21,17 @@ Function Get-MDSForestADGroupMember {
     #>
 
     #Requires -Module ActiveDirectory
-    [cmdletbinding()]
+
+    [CmdletBinding(
+		SupportsShouldProcess,
+		DefaultParameterSetName="MDSCredential"
+	)]
     param(
         # Pipeline variable
         [parameter(Mandatory=$True,ValueFromPipeline)]
         [ValidateNotNullOrEmpty()]
         [string]$Identity,
-        
+
         [parameter()]
         [ValidateNotNullOrEmpty()]
         [string]$Domain
@@ -45,7 +49,7 @@ Function Get-MDSForestADGroupMember {
                 $getADDomainSplat.Add('Identity',$Domain)
             }
             $ADDomain = Get-ADDomain @getADDomainSplat
-            
+
             # Set the server to query
             $Server = $ADDomain.PDCEmulator
             Write-Verbose "Found server $Server in domain $($ADDomain.domain)"
@@ -97,12 +101,14 @@ Function Get-MDSForestADGroupMember {
                 Recursive   = $true
                 ErrorAction = 'Stop'
             }
-            Write-Verbose "Get-ADGroupMember: Querying group $($ADGroup.DistinguishedName)"
-            Get-ADGroupMember @getADGroupMemberSplat | Sort-Object Name
 
+            $ShouldProcessTarget = $ADGroup.DistinguishedName
+            If ($PSCmdlet.ShouldProcess($ShouldProcessTarget,$MyInvocation.MyCommand)) {
+                Get-ADGroupMember @getADGroupMemberSplat | Sort-Object Name
+            }
         }
         Catch {
-            $PsCmdlet.ThrowTerminatingError($PSItem)
+            Write-Error $PSItem
         }
     }
 	end {}

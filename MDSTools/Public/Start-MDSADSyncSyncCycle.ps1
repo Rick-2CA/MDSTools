@@ -23,60 +23,57 @@ Function Start-MDSADSyncSyncCycle {
 
     .NOTES
 
-    #>
-	[CmdletBinding(DefaultParameterSetName="MDSCredential")]
+	#>
+	[System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingPlainTextForPassword','')]
+	[System.Diagnostics.CodeAnalysis.SuppressMessage('PSUsePSCredentialType','')]
+
+	[CmdletBinding(DefaultParameterSetName='MDSCredential')]
 	Param (
-		[parameter(Position=0,ParameterSetName="MDSCredential")]
+		[parameter(Position=0,ParameterSetName='MDSCredential')]
 		[ValidateNotNullOrEmpty()]
 		[String]$MDSCredential,
 
-		[parameter(Position=0,ParameterSetName="Credential")]
+		[parameter(Position=0,ParameterSetName='Credential')]
 		[ValidateNotNullOrEmpty()]
 		[System.Management.Automation.CredentialAttribute()]
 		$Credential,
 
-		[parameter(Position=1, ParameterSetName="MDSCredential", Mandatory=$False)]
-		[parameter(Position=1, ParameterSetName="Credential", Mandatory=$False)]
+		[parameter(Position=1, ParameterSetName='MDSCredential', Mandatory=$False)]
+		[parameter(Position=1, ParameterSetName='Credential', Mandatory=$False)]
 		[string]$ServerName,
 
-		[parameter(Position=2, ParameterSetName="MDSCredential", Mandatory=$True)]
-		[parameter(Position=2, ParameterSetName="Credential", Mandatory=$True)]
+		[parameter(Position=2, ParameterSetName='MDSCredential', Mandatory=$True)]
+		[parameter(Position=2, ParameterSetName='Credential', Mandatory=$True)]
 		[switch]$StartSync
 	)
-	
+
 	Begin {}
-	
 	Process {
-		# Capture MDS Credentials.  If no credentials were specified the current credentials are used.
-		If ($PsCmdlet.ParameterSetName -eq "MDSCredential" -and -not [string]::IsNullOrEmpty($MDSCredential)) {
-			Try {
-				$Credential = Get-MDSCredential -Name $MDSCredential
+		Try {
+			# MDSCredential
+			If ($PSBoundParameters.MDSCredential) {
+				$Credential = Get-MDSCredential -Name $MDSCredential -ErrorAction Stop
 			}
-			Catch {
-				$PsCmdlet.ThrowTerminatingError($PSItem)
-			}
-		}
 
-		# Use the configuration file if a servername was not specified
-		If (-not $ServerName) {
-			$Setting = 'ADConnectServer'
-			Try {$ServerName = Get-MDSConfiguration -Setting $Setting}
-			Catch {
-				Throw "A server name was not specified.  Use the -ServerName parameter or configure the $Setting setting with Set-MDSConfiguration."
+			# Use the configuration file if a servername was not specified
+			If (-not $PSBoundParameters.ServerName) {
+				$Setting = 'ADConnectServer'
+				Try {$ServerName = Get-MDSConfiguration -Setting $Setting -ErrorAction Stop}
+				Catch {
+					Throw "A server name was not specified.  Use the -ServerName parameter or configure the $Setting setting with Set-MDSConfiguration."
+				}
 			}
-		}
 
-		$Parameters = @{
-			'ComputerName'	= $ServerName
-			'ErrorAction'	= "Stop"
-		}
-		If ($Credential) {[void]$Parameters.Add('Credential',$Credential)}
-		
-		If (Invoke-Command @Parameters -ScriptBlock {Get-ADSyncConnectorRunStatus}) {
-			Write-Warning "A sync cycle is already in progress."
-		}
-		Else {
-			Try {
+			$Parameters = @{
+				'ComputerName'	= $ServerName
+				'ErrorAction'	= "Stop"
+			}
+			If ($Credential) {[void]$Parameters.Add('Credential',$Credential)}
+
+			If (Invoke-Command @Parameters -ScriptBlock {Get-ADSyncConnectorRunStatus}) {
+				Write-Warning "A sync cycle is already in progress."
+			}
+			Else {
 				# Load the module and start the sync on the AD Connect Server
 				Write-Verbose "Initializing Azure AD Delta Sync..."
 				Invoke-Command @Parameters -ScriptBlock {Import-Module ADSync;Start-ADSyncSyncCycle -PolicyType Delta}
@@ -95,7 +92,7 @@ Function Start-MDSADSyncSyncCycle {
 					Write-Verbose "Sync has started..."
 
 					# Monitor the runstate and record the progress with a progress bar
-					While($null -ne $ADSyncConnectorRunStatus.RunState) {
+					While ($null -ne $ADSyncConnectorRunStatus.RunState) {
 						$ADSyncConnectorRunStatus = Invoke-Command @Parameters -ScriptBlock {Get-ADSyncConnectorRunStatus}
 						# Progress Bar Processing
 						$Date = Get-Date
@@ -121,9 +118,10 @@ Function Start-MDSADSyncSyncCycle {
 					Throw (New-Object -TypeName System.Exception -ArgumentList $Message)
 				}
 			}
-			Catch {$PsCmdlet.ThrowTerminatingError($PSItem)}
+		}
+		Catch {
+			Write-Error $PSItem
 		}
 	}
-	
 	End {}
 }
