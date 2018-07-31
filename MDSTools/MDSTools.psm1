@@ -2,8 +2,8 @@ $moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path
 
 # Create aliases
 Write-Verbose "Creating Aliases"
-New-Alias -Name Start-MDSEMC -Value Start-MDSExchMgmtConsole
-New-Alias -Name Import-MDSEXO -Value Import-MDSExchOnline
+New-Alias -Name Start-MDSEMC -Value Start-MDSExchMgmtConsole -Force
+New-Alias -Name Import-MDSEXO -Value Import-MDSExchOnline -Force
 
 # Import everything in the functions folders
 Write-Verbose "Importing Functions"
