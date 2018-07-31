@@ -10,7 +10,7 @@ function Get-MDSMsolLicenseServicePlan {
     Get-MDSMsolLicenseServicePlan -UserPrincipalName user@domain.com
 
 	List all service plans from all licenses for a single user
-	
+
     .EXAMPLE
 	Get-MDSMsolLicenseServicePlan -UserPrincipalName user@domain.com -ServicePlan Teams1,YAMMER_ENTERPRISE
 
@@ -47,12 +47,12 @@ function Get-MDSMsolLicenseServicePlan {
 
         [Parameter(Mandatory=$False)]
 		[string[]]$ServicePlan,
-		
+
 		[Parameter(Mandatory=$False)]
 		[string[]]$AccountSkuID
     )
-	
-    begin {}   
+
+    begin {}
     process {
 		ForEach ($UPN in $UserPrincipalName) {
 			# Get the licenses and confirm the UserPrincipalName exists
@@ -64,7 +64,7 @@ function Get-MDSMsolLicenseServicePlan {
 				Catch {
 					$PSCmdlet.ThrowTerminatingError($PSItem)
 				}
-			}        
+			}
 
 			# Confirm any license was found
 			If ($Licenses.count -eq 0) {
@@ -83,7 +83,7 @@ function Get-MDSMsolLicenseServicePlan {
 				}
 			}
 
-			# Flatten the license details for the user only if the license contains a 
+			# Flatten the license details for the user only if the license contains a
 			# provided service plan.
 			[array]$LicenseCollection = ForEach ($License in $Licenses) {
 				ForEach ($Status in $License.ServiceStatus) {

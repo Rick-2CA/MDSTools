@@ -10,7 +10,7 @@ function Enable-MDSMsolLicenseServicePlan {
     Enable-MDSMsolLicenseServicePlan -UserPrincipalName user@domain.com -ServicePlan Teams1
 
 	Enable a single service plan for a single user
-	
+
     .EXAMPLE
 	Enable-MDSMsolLicenseServicePlan -UserPrincipalName user@domain.com -ServicePlan Teams1,YAMMER_ENTERPRISE
 
@@ -47,12 +47,12 @@ function Enable-MDSMsolLicenseServicePlan {
 
         [Parameter(Mandatory=$True)]
 		[string[]]$ServicePlan,
-		
+
 		[Parameter(Mandatory=$False)]
 		[string[]]$AccountSkuID
     )
-	
-    begin {}   
+
+    begin {}
     process {
 		ForEach ($UPN in $UserPrincipalName) {
 			# Get the licenses and confirm the UserPrincipalName exists
@@ -64,7 +64,7 @@ function Enable-MDSMsolLicenseServicePlan {
 				Catch {
 					$PSCmdlet.ThrowTerminatingError($PSItem)
 				}
-			}        
+			}
 
 			# Confirm any license was found
 			If ($Licenses.count -eq 0) {
@@ -82,16 +82,16 @@ function Enable-MDSMsolLicenseServicePlan {
 				}
 			}
 
-			# Flatten the license details for the user only if the license contains a 
+			# Flatten the license details for the user only if the license contains a
 			# provided service plan.
 			[array]$LicenseCollection = ForEach ($License in $Licenses) {
 				$ProcessLicense = $False
-				ForEach ($Plan in $ServicePlan) {	
+				ForEach ($Plan in $ServicePlan) {
 					If ($License.ServiceStatus.ServicePlan.ServiceName -match $Plan) {
 						$ProcessLicense = $True
 					}
 				}
-				
+
 				If ($ProcessLicense -eq $True) {
 					ForEach ($Status in $License.ServiceStatus) {
 						[pscustomobject] @{
@@ -113,7 +113,7 @@ function Enable-MDSMsolLicenseServicePlan {
 					Continue
 				}
 			}
-			
+
 			# Seperate the objects by AccountSkuID for license processing
 			[array]$UpdateLicenses = ($LicenseCollection | Select-Object AccountSkuID -Unique).AccountSkuID
 			# Go through the licenses to reapply the license with the updated disable options where necessary
@@ -131,17 +131,17 @@ function Enable-MDSMsolLicenseServicePlan {
 						# The user would have been notified previously of this scenario so we silently continue
 						Continue
 					}
-					
+
 					# Ensure the specified service plan is active
 					If ($PlanProvisioningStatus -ne "Success") {
-						[void]$ConfirmedPlansToEnable.Add($Plan)				
+						[void]$ConfirmedPlansToEnable.Add($Plan)
 					} # End If
 					Else {
 						Write-Warning ("{0}:  The service plan {1} in license {2} is already enabled." -f $UPN,$Plan,$UpdateLicense)
 						Continue
 					} # End Else
 				} # End ForEach
-			
+
 				# If the user didn't change...
 				If (-not ($ConfirmedPlansToEnable)) {
 					Write-Warning ("{0}:  No action was taken for license {1}." -f $UPN,$UpdateLicense)
@@ -149,7 +149,7 @@ function Enable-MDSMsolLicenseServicePlan {
 				}
 
 				# Get all currently disabled service plans excluding the service plan to be disabled
-				$DisabledPlans = ($CurrentLicense | 
+				$DisabledPlans = ($CurrentLicense |
 					Where-Object {$_.ProvisioningStatus -eq "Disabled" -and $ConfirmedPlansToEnable -notcontains $_.ServiceName}).ServiceName
 				# Build the licensing options using the current AccountSkuID & collected service plans to disable
 				$LicenseOptions = New-MsolLicenseOptions -AccountSkuId $UpdateLicense -DisabledPlans $DisabledPlans
