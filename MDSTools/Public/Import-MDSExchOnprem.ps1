@@ -24,104 +24,113 @@ Function Import-MDSExchOnprem {
     .NOTES
 
 	#>
-	[CmdletBinding()]
-	Param(
-		[Parameter(Mandatory)]
-		[string]$MDSCredential,
+	[System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingPlainTextForPassword','')]
+	[System.Diagnostics.CodeAnalysis.SuppressMessage('PSUsePSCredentialType','')]
 
-		[Parameter(Mandatory)]
+	[CmdletBinding(DefaultParameterSetName = 'Credential')]
+	Param(
+		[parameter(
+            Position = 0,
+            Mandatory = $true,
+            ParameterSetName = 'MDSCredential'
+        )]
+		[String]$MDSCredential,
+
+		[parameter(
+			Position = 0,
+			Mandatory = $true,
+            ParameterSetName = 'Credential'
+        )]
+		[ValidateNotNullOrEmpty()]
+		[System.Management.Automation.CredentialAttribute()]
+		$Credential,
+
+		[Parameter(
+			Position = 1,
+			Mandatory = $false,
+			ParameterSetName = 'MDSCredential'
+		)]
+		[parameter(ParameterSetName = 'Credential')]
 		[string]$ExchangeServer,
 
+        [parameter(
+            Position = 2,
+            ParameterSetName = 'MDSCredential'
+        )]
+		[parameter(ParameterSetName = 'Credential')]
 		[string]$Prefix,
-		
+
+		[parameter(
+            Position = 3,
+            ParameterSetName = 'MDSCredential'
+        )]
+		[parameter(ParameterSetName = 'Credential')]
 		[switch]$ViewEntireForest
 	)
-	
+
 	Begin {
 		$SessionName = 'Microsoft.Exchange'
-		Write-Verbose $SessionName
 		If (Get-PSSession -Name $SessionName -ErrorAction SilentlyContinue) {
 			Try {
-				Remove-PSSession $SessionName -ErrorAction Stop
+				Remove-PSSession -Name $SessionName -ErrorAction Stop
 				Write-Verbose "Session $($SessionName) removed"
 			}
 			Catch {}
 		}
 	}
-	
 	Process {
-		# Credentials
-		If ($MDSCredential) {
-			Try {$Credential = Get-MDSCredential -Name $MDSCredential -ErrorAction Stop}
-			Catch {
-				Write-Error $_
-				Return $Null
+		Try {
+			# MDSCredentials
+			If ($PSBoundParameters.MDSCredential) {
+				$Credential = Get-MDSCredential -Name $MDSCredential -ErrorAction Stop
 			}
-		}
-		Else {
-			Try {$Credential = Get-Credential -ErrorAction Stop}
-			Catch {
-				Write-Error $_
-				Return $Null
-			}
-		}
-		
-		# Exchange Server Query
-		If (-not $ExchangeServer) {
-			Try {$ExchangeServer = Get-MDSExchServerFromLDAP -Random -ErrorAction Stop | Select -Expand FQDN}
-			Catch {
-				Write-Error $_
-				Return $Null
-			}
-		}
-		
-		# New-PSSession
-		$SessionParameters = @{
-			'Name'					= $SessionName 
-			'ConfigurationName'		= 'Microsoft.Exchange'
-			'ConnectionUri'			= "http://$($ExchangeServer)/Powershell/?SerializationLevel=Full"
-			'Credential'			= $Credential
-			'Authentication'		= 'Kerberos'
-		}
-		Try {$Session = New-PSSession @SessionParameters -ErrorAction Stop}
-		Catch {
-			Write-Error $_
-			Return $Null
-		}
 
-		# Import-PSSession
-		$PSSessionParameters = @{
-			'Session'	= $Session
-			
-		}
-		If ($Prefix) {$PSSessionParameters.Add("Prefix",$Prefix)}
-		Try {$ModuleInfo = Import-PSSession @PSSessionParameters -AllowClobber -DisableNameChecking -ErrorAction Stop}
-		#Try {Import-PSSession @PSSessionParameters -AllowClobber -DisableNameChecking -ErrorAction Stop}
-		Catch {
-			Write-Error $_
-			Return $Null
-		}
-		
-		# Import-Module
-		$ModuleParameters = @{
-			'ModuleInfo'	= $ModuleInfo
-			
-		}
-		If ($Prefix) {$ModuleParameters.Add("Prefix",$Prefix)}
-		Try {Import-Module @ModuleParameters -DisableNameChecking -Global -ErrorAction Stop}
-		Catch {
-			Write-Error $_
-			Return $Null
-		}
-		
-		# Set-ADServerSettings to view the entire forest
-		If ($ViewEntireForest) {
-			$ADServerSettings = Get-Command "Set-$($Prefix)ADServerSettings"
-			If ($ADServerSettings) {
-				& $ADServerSettings -ViewEntireForest $True
+			# Exchange Server Query
+			If (-not $PSBoundParameters.ExchangeServer) {
+				$ExchangeServer = Get-MDSExchServerFromLDAP -Random -ErrorAction Stop | Select-Object -Expand FQDN
 			}
+
+			# New-PSSession
+            $SessionParameters = @{
+                Name              = $SessionName
+                ConfigurationName = 'Microsoft.Exchange'
+                ConnectionUri     = "http://$($ExchangeServer)/Powershell/?SerializationLevel=Full"
+                Credential        = $Credential
+                Authentication    = 'Kerberos'
+            }
+			$Session = New-PSSession @SessionParameters -ErrorAction Stop
+
+			# Import-PSSession
+            $PSSessionParameters = @{
+                Session             = $Session
+                AllowClobber        = $true
+                DisableNameChecking = $true
+                ErrorAction         = 'Stop'
+            }
+			If ($PSBoundParameters.Prefix) {$PSSessionParameters.Add("Prefix",$Prefix)}
+			$ModuleInfo = Import-PSSession @PSSessionParameters
+
+			# Import-Module
+            $ModuleParameters = @{
+                ModuleInfo          = $ModuleInfo
+                DisableNameChecking = $true
+                Global              = $true
+                ErrorAction         = 'Stop'
+            }
+			If ($PSBoundParameters.Prefix) {$ModuleParameters.Add("Prefix",$Prefix)}
+			Import-Module @ModuleParameters
+
+			# Set-ADServerSettings to view the entire forest
+			If ($PSBoundParameters.ViewEntireForest) {
+				$ADServerSettings = Get-Command "Set-$($Prefix)ADServerSettings"
+				If ($ADServerSettings) {
+					& $ADServerSettings -ViewEntireForest $True
+				}
+			}
+		}
+		Catch {
+			Write-Error $PSItem
 		}
 	}
-	
 	End {}
 }

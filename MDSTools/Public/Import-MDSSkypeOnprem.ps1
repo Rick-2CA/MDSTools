@@ -19,91 +19,108 @@ Function Import-MDSSkypeOnPrem {
     .NOTES
 
 	#>
-	[CmdletBinding()]
-	Param(
-		[Parameter(Mandatory)]
-		[string]$MDSCredential,
+	[System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingPlainTextForPassword','')]
+	[System.Diagnostics.CodeAnalysis.SuppressMessage('PSUsePSCredentialType','')]
 
-		[Parameter()]
+	[CmdletBinding(DefaultParameterSetName = 'Credential')]
+	Param(
+		[parameter(
+            Position = 0,
+            Mandatory = $true,
+            ParameterSetName = 'MDSCredential'
+        )]
+		[String]$MDSCredential,
+
+		[parameter(
+			Position = 0,
+			Mandatory = $true,
+            ParameterSetName = 'Credential'
+        )]
+		[ValidateNotNullOrEmpty()]
+		[System.Management.Automation.CredentialAttribute()]
+		$Credential,
+
+		[parameter(
+			Position = 1,
+			Mandatory = $false,
+            ParameterSetName = 'Credential'
+		)]
+		[parameter(ParameterSetName = 'Credential')]
 		[string]$ServerName,
 
+        [parameter(
+            Position = 2,
+            Mandatory = $false,
+            ParameterSetName = 'Credential'
+        )]
+		[parameter(ParameterSetName = 'Credential')]
 		[string]$Prefix
 	)
-	
+
 	Begin {
 		$SessionName = 'Microsoft.Skype'
-		Write-Verbose $SessionName
 		If (Get-PSSession -Name $SessionName -ErrorAction SilentlyContinue) {
 			Try {
-				Remove-PSSession $SessionName -ErrorAction Stop
+				Remove-PSSession -Name $SessionName -ErrorAction Stop
 				Write-Verbose "Session $($SessionName) removed"
 			}
 			Catch {}
 		}
 	}
-	
 	Process {
-		# Credentials
-		If ($MDSCredential) {
-			Try {$Credential = Get-MDSCredential -Name $MDSCredential -ErrorAction Stop}
-			Catch {
-				Write-Error $_
-				Return $Null
+		Try {
+			# MDSCredentials
+			If ($PSBoundParameters.MDSCredential) {
+				$Credential = Get-MDSCredential -Name $MDSCredential -ErrorAction Stop
 			}
-		}
-		Else {
-			Try {$Credential = Get-Credential -ErrorAction Stop}
-			Catch {
-				Write-Error $_
-				Return $Null
-			}
-		}
 
-		# Use the configuration file if a servername was not specified
-		If (-not $ServerName) {
-			$Setting = 'SkypeOnPremServer'
-			Try {$ServerName = Get-MDSConfiguration -Setting $Setting}
-			Catch {
-				Throw "A server name was not specified.  Use the -ServerName parameter or configure the $Setting setting with Set-MDSConfiguration."
+			# Use the configuration file if a servername was not specified
+			If (-not $PSBoundParameters.ServerName) {
+				$Setting = 'SkypeOnPremServer'
+				Try {
+					$ServerName = Get-MDSConfiguration -Setting $Setting -ErrorAction Stop
+				}
+				Catch {
+					Throw "A server name was not specified.  Use the -ServerName parameter or configure the $Setting setting with Set-MDSConfiguration."
+				}
 			}
-		}
-		
-		# New-PSSession
-		$SessionParameters = @{
-			'Name'					= $SessionName 
-			'ConnectionUri'			= "https://$($ServerName)/ocspowershell"
-			'Credential'			= $Credential
-		}
-		Try {$Session = New-PSSession @SessionParameters -ErrorAction Stop}
-		Catch {
-			Write-Error $_
-			Return $Null
-		}
 
-		# Import-PSSession
-		$PSSessionParameters = @{
-			'Session'	= $Session
-			
+			# New-PSSession
+            $SessionParameters = @{
+                Name          = $SessionName
+                ConnectionUri = "https://$($ServerName)/ocspowershell"
+                Credential    = $Credential
+                ErrorAction   = 'Stop'
+            }
+			$Session = New-PSSession @SessionParameters
+
+			# Import-PSSession
+			$PSSessionParameters = @{
+				Session             = $Session
+                AllowClobber        = $true
+                DisableNameChecking = $true
+                ErrorAction         = 'Stop'
+			}
+			If ($PSBoundParameters.Prefix) {
+				$PSSessionParameters.Add("Prefix",$Prefix)
+			}
+			$ModuleInfo = Import-PSSession @PSSessionParameters
+
+			# Import-Module
+			$ModuleParameters = @{
+                ModuleInfo          = $ModuleInfo
+                DisableNameChecking = $true
+                Global              = $true
+                ErrorAction         = 'Stop'
+            }
+			If ($PSBoundParameters.Prefix) {
+				$ModuleParameters.Add("Prefix",$Prefix)
+			}
+			Import-Module @ModuleParameters
 		}
-		If ($Prefix) {$PSSessionParameters.Add("Prefix",$Prefix)}
-		Try {$ModuleInfo = Import-PSSession @PSSessionParameters -AllowClobber -DisableNameChecking -ErrorAction Stop}
 		Catch {
-			Write-Error $_
-			Return $Null
-		}
-		
-		# Import-Module
-		$ModuleParameters = @{
-			'ModuleInfo'	= $ModuleInfo
-			
-		}
-		If ($Prefix) {$ModuleParameters.Add("Prefix",$Prefix)}
-		Try {Import-Module @ModuleParameters -DisableNameChecking -Global -ErrorAction Stop}
-		Catch {
-			Write-Error $_
-			Return $Null
+			Write-Error $PSItem
 		}
 	}
-	
 	End {}
 }
