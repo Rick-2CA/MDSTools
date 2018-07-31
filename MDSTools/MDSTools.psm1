@@ -19,7 +19,7 @@ New-Variable CredentialFileName -Value 'MDSCredentials.xml' -Option ReadOnly -Sc
 New-Variable CredentialFilePath -Value (Get-MDSCredentialPath -FileName $CredentialFileName) -Option ReadOnly -Scope Script
 
 Try {
-    $null = Get-MDSConfiguration
+    $null = Get-MDSConfiguration -ErrorAction Stop
 }
 Catch {
     $ConfigurationFilePath = Get-MDSConfigurationPath -FileName Configuration.psd1
