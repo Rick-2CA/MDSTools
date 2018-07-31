@@ -84,7 +84,6 @@ Function Import-MDSExchOnline {
 			$PSSessionParameters = @{
 				Session             = $Session
 				DisableNameChecking = $true
-				Global              = $true
 				ErrorAction         = 'Stop'
 			}
 			If ($PSBoundParameters.Prefix) {$PSSessionParameters.Add("Prefix",$Prefix)}
