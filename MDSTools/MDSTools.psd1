@@ -15,7 +15,7 @@ RootModule = 'MDSTools.psm1'
 # ModuleToProcess = ''
 
 # Version number of this module.
-ModuleVersion = '2.1.10.40'
+ModuleVersion = '2.1.11.41'
 
 # ID used to uniquely identify this module
 GUID = 'de49acac-5b32-408a-8364-da71ae77d486'
