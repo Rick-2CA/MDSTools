@@ -7,7 +7,7 @@ New-Alias -Name Import-MDSEXO -Value Import-MDSExchOnline -Force
 
 # Import everything in the functions folders
 Write-Verbose "Importing Functions"
-$privateFunctions = Get-ChildItem "$moduleRoot\Private\*.ps1" | Where-Object { -not ($_.FullName.Contains(".Tests.")) }
+$privateFunctions = Get-ChildItem "$moduleRoot\Private\*.ps1" -Recurse | Where-Object { -not ($_.FullName.Contains(".Tests.")) }
 $privateFunctions | ForEach-Object {Write-Verbose "Private Function: $($_.FullName)"; . ([scriptblock]::Create([io.file]::ReadAllText($PSItem)))}
 
 $publicFunctions = Get-ChildItem "$moduleRoot\Public\*.ps1" | Where-Object { -not ($_.FullName.Contains(".Tests.")) }
@@ -23,7 +23,7 @@ Try {
 }
 Catch {
     $ConfigurationFilePath = Get-MDSConfigurationPath -FileName Configuration.psd1
-     Write-Host "Thank you for using MDS Tools. You must configure your module settings to avoid this warning when importing the module. Use 'Get-Help Set-MDSConfiguration' to see configuration settings and 'Set-MDSConfiguration' to set them.  The store file will be saved in $ConfigurationFilePath." -ForegroundColor Black -BackgroundColor Yellow
+    Write-Host "Thank you for using MDS Tools. You must configure your module settings to avoid this warning when importing the module. Use 'Get-Help Set-MDSConfiguration' to see configuration settings and 'Set-MDSConfiguration' to set them.  The store file will be saved in $ConfigurationFilePath." -ForegroundColor Black -BackgroundColor Yellow
 }
 
 # Export module members
