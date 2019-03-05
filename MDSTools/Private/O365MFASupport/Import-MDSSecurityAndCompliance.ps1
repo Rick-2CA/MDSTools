@@ -1,30 +1,26 @@
-Function Import-MDSExchOnline {
+Function Import-MDSSecurityAndCompliance {
 	<#
     .SYNOPSIS
-	Import the Exchange Online PowerShell cmdlets by passing an MDSCredential, credential, or via a credential prompt when used interactively.
+	Import the Security and Compliance PowerShell cmdlets by passing an MDSCredential, credential, or via a credential prompt when used interactively.
 
     .DESCRIPTION
-    Import the Exchange Online PowerShell cmdlets by passing an MDSCredential, credential, or via a credential prompt when used interactively.
+    Import the Security and Compliance PowerShell cmdlets by passing an MDSCredential, credential, or via a credential prompt when used interactively.
 
     .EXAMPLE
-    Import-MDSExchOnline -MDSCredential MyCred1
+    Import-MDSSecurityAndCompliance -MDSCredential MyCred1
 
 	Import the EXO cmdlets with the stored 'MyCred1' credentials.  The stored credential username should be a UPN.
 
-    .EXAMPLE
-    Import-MDSExchOnline -MDSCredential MyCred1 -Prefix O365
-
-	Import the EXO cmdlets with the stored 'MyCred1' credentials and prefix the cmdlets.  For example Get-Mailbox becomes Get-O365Mailbox.  This allows you to load both the EXO cmdlets and Exchange cmdlets in the same session.
-
 	.EXAMPLE
-	Import-MDSExchOnline -Credential $CredentialObject
+	Import-MDSSecurityAndCompliance -Credential $CredentialObject
 
 	Import the EXO cmdlets with a credential object.
 
     .NOTES
 
 	#>
-	[System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingPlainTextForPassword','')]
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingPlainTextForPassword','')]
 	[System.Diagnostics.CodeAnalysis.SuppressMessage('PSUsePSCredentialType','')]
 
 	[CmdletBinding(DefaultParameterSetName = 'Credential')]
@@ -54,7 +50,7 @@ Function Import-MDSExchOnline {
 	)
 
 	Begin {
-		$SessionName = 'Microsoft.Exchange.Online'
+		$SessionName = 'Microsoft.SecurityAndCompliance'
 		If (Get-PSSession -Name $SessionName -ErrorAction SilentlyContinue) {
 			Try {
 				Remove-PSSession -Name $SessionName -ErrorAction Stop
@@ -70,13 +66,14 @@ Function Import-MDSExchOnline {
 				$Credential = Get-MDSCredential -Name $MDSCredential -ErrorAction Stop
 			}
 
-			# New-PSSession
+            # New-PSSession
 			$SessionParameters = @{
 				Name              = $SessionName
 				ConfigurationName = 'Microsoft.Exchange'
-				ConnectionUri     = 'https://outlook.office365.com/powershell-liveid/'
+				ConnectionUri     = 'https://ps.compliance.protection.outlook.com/powershell-liveid/'
 				Credential        = $Credential
 				Authentication    = 'Basic'
+				AllowRedirection  = $true
 			}
 			$Session = New-PSSession @SessionParameters
 
