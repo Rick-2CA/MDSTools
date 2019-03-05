@@ -15,7 +15,7 @@ RootModule = 'MDSTools.psm1'
 # ModuleToProcess = ''
 
 # Version number of this module.
-ModuleVersion = '2.1.11.42'
+ModuleVersion = '2.1.12.44'
 
 # ID used to uniquely identify this module
 GUID = 'de49acac-5b32-408a-8364-da71ae77d486'
@@ -69,7 +69,7 @@ RequiredModules = @(@{ModuleName="Configuration";RequiredVersion="1.2.0";GUID='e
 # NestedModules = @()
 
 # Functions to export from this module
-FunctionsToExport = @('Add-MDSCredential','Connect-MDSMsolService','Disable-MDSMsolLicenseServicePlan','Enable-MDSMsolLicenseServicePlan','Find-MDSUserName','Get-MDSADLockoutSource','Get-MDSConfiguration','Get-MDSCredential','Get-MDSExchServerFromLDAP','Get-MDSForestADGroupMember','Get-MDSMsolLicenseServicePlan','Import-MDSExchOnline','Import-MDSExchOnprem','Import-MDSSkypeOnprem','Remove-MDSCredential','Set-MDSConfiguration','Start-MDSADSyncSyncCycle','Start-MDSADUC','Start-MDSExchMgmtConsole','Start-MDSExplorer','Start-MDSGPMC','Start-MDSPowerShell','Start-MDSSitesAndServices','Start-MDSWebBrowser','Test-MDSADAuthentication','Update-MDSCredential','Connect-MDSOffice365')
+FunctionsToExport = @('Add-MDSCredential','Connect-MDSMsolService','Connect-MDSOffice365','Disable-MDSMsolLicenseServicePlan','Enable-MDSMsolLicenseServicePlan','Find-MDSUserName','Get-MDSADLockoutSource','Get-MDSConfiguration','Get-MDSCredential','Get-MDSExchServerFromLDAP','Get-MDSForestADGroupMember','Get-MDSMsolLicenseServicePlan','Import-MDSExchOnline','Import-MDSExchOnprem','Import-MDSSkypeOnprem','Remove-MDSCredential','Set-MDSConfiguration','Start-MDSADSyncSyncCycle','Start-MDSADUC','Start-MDSExchMgmtConsole','Start-MDSExplorer','Start-MDSGPMC','Start-MDSPowerShell','Start-MDSSitesAndServices','Start-MDSWebBrowser','Test-MDSADAuthentication','Update-MDSCredential')
 
 # Cmdlets to export from this module
 CmdletsToExport = @()
