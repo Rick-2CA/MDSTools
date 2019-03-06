@@ -91,7 +91,12 @@ function Connect-MDSOffice365 {
 
     begin {
         If ($PSBoundParameters.ContainsKey('MDSCredential')) {
-            $Credential = Get-MDSCredential -Name $MDSCredential -ErrorAction Stop
+            Try {
+                $Credential = Get-MDSCredential -Name $MDSCredential -ErrorAction Stop
+            }
+            Catch {
+                Throw $PSItem
+            }
         }
     }
     process {
@@ -122,7 +127,7 @@ function Connect-MDSOffice365 {
 
                 Exchange {
                     If ($True -eq $MFA) {
-                        Try {    
+                        Try {
                             $connectEXOPSSessionSplat = @{
                                 ErrorAction = 'Stop'
                                 Verbose     = $False
