@@ -41,18 +41,15 @@ Function Get-MDSForestADGroupMember {
 	process	{
         Try {
             # Get domain information
-            $getADDomainSplat = @{
-                ErrorAction = 'Stop'
-            }
             If ($null -ne $PSBoundParameters.Domain) {
-                Write-Verbose "Querying for domain $Domain"
-                $getADDomainSplat.Add('Identity',$Domain)
-            }
-            $ADDomain = Get-ADDomain @getADDomainSplat
 
-            # Set the server to query
-            $Server = $ADDomain.PDCEmulator
-            Write-Verbose "Found server $Server in domain $($ADDomain.domain)"
+                $DomainType     = [System.DirectoryServices.ActiveDirectory.DirectoryContextType]::Domain
+                $DomainContext  = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext($DomainType, $Domain)
+                $Server = [System.DirectoryServices.ActiveDirectory.Domain]::GetDomain($DomainContext).PdcRoleOwner.Name
+            }
+            Else {
+                $Server = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain().PdcRoleOwner.Name
+            }
 
             # Select the object type to query based on the identity provided
                 <#
@@ -82,6 +79,7 @@ Function Get-MDSForestADGroupMember {
 
             # Query AD for the group
             Write-Verbose "Get-ADUser:  Querying server $($Server) where $($FilterProperty) equals $($Identity)"
+            #TODO:  Replace Get-ADGroup
             $getADGroupSplat = @{
                 Filter      = {$FilterProperty -eq $Identity}
                 Server      = $Server
@@ -104,6 +102,7 @@ Function Get-MDSForestADGroupMember {
 
             $ShouldProcessTarget = $ADGroup.DistinguishedName
             If ($PSCmdlet.ShouldProcess($ShouldProcessTarget,$MyInvocation.MyCommand)) {
+                #TODO:  Replace Get-ADGroupMember
                 Get-ADGroupMember @getADGroupMemberSplat | Sort-Object Name
             }
         }
