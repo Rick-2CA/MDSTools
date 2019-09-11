@@ -22,7 +22,7 @@ Function Get-MDSADLockoutSource {
     Written by Rick A., December 2017
 
     #>
-    [CmdletBinding(DefaultParameterSetName='None')]
+    [CmdletBinding(DefaultParameterSetName)]
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingPlainTextForPassword','')]
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUsePSCredentialType','')]
 
@@ -33,27 +33,22 @@ Function Get-MDSADLockoutSource {
             ValueFromPipeline               = $true,
             ValueFromPipelineByPropertyName = $true
         )]
-        [Parameter(ParameterSetName="MDSCredential")]
-        [Parameter(ParameterSetName="Credential")]
-        [Parameter(ParameterSetName="None")]
         [ValidateNotNullOrEmpty()]
         [string[]]$SamAccountName,
 
-        [Parameter(Position=1,ParameterSetName="MDSCredential")]
-        [Parameter(Position=1,ParameterSetName="Credential")]
-        [Parameter(Position=1,ParameterSetName="None")]
+        [Parameter(Position=1)]
         [string]$Server,
 
-        [parameter(Position=2,ParameterSetName="MDSCredential")]
+        [Parameter(Position=2,ParameterSetName="MDSCredential")]
         [ValidateNotNullOrEmpty()]
         [String]$MDSCredential,
 
-        [parameter(Position=2,ParameterSetName="Credential")]
+        [Parameter(Position=2,ParameterSetName="Credential")]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.CredentialAttribute()]
         $Credential
     )
-    #requires -Module ActiveDirectory
+
 	begin {}
 	process	{
         Try {
@@ -63,8 +58,8 @@ Function Get-MDSADLockoutSource {
 			}
 
             If ($null -eq $PSBoundParameters.Server) {
-                $Server = Get-ADDomain -ErrorAction Stop | Select-Object -Expand PDCEmulator
-                $VerboseString = 'No server specified.  Using the PDCEmulator {0}.' -f $Server
+                $Server = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain().PdcRoleOwner.Name
+                $VerboseString = 'No server specified.  Using PDCEmulator: {0}.' -f $Server
                 Write-Verbose $VerboseString
             }
         }
@@ -74,22 +69,15 @@ Function Get-MDSADLockoutSource {
 
         ForEach ($Name in $SamAccountName) {
             Try {
-                $Events = $ADUser = $null
+                $Events = $Account = $SID = $null
 
-                $VerboseString = 'Performing AD query for {0}.' -f $Name
-                Write-Verbose $VerboseString
-                $getADUserSplat = @{
-                    Filter      = {SamAccountName -eq $Name}
-                    Properties  = 'AccountLockoutTime'
-                    Server      = $Server
-                    ErrorAction = 'Stop'
+                Try {
+                    $Account = New-Object Security.Principal.NTAccount $Name
+                    $SID = $Account.Translate([Security.Principal.Securityidentifier]).Value
                 }
-                $ADUser = Get-ADUser @getADUserSplat
-
-                If ($null -eq $ADUser) {
-                    $ErrorString = 'Cannot find object with samaccountname: {0}' -f $SamAccountName
-                    Write-Error $ErrorString
-                    Continue
+                Catch {
+                    $ThrowString = 'Cannot find object with samaccountname: {0}' -f $SamAccountName
+                    Throw $ThrowString
                 }
 
                 # Lockout:  'Microsoft-Windows-Security-Auditing', ID 4740
@@ -109,19 +97,12 @@ Function Get-MDSADLockoutSource {
                 If ($Credential) {
                     [void]$getWinEventSplat.Add('Credential',$Credential)
                 }
-                Try {
-                    [array]$Events = Get-WinEvent @getWinEventSplat
-                }
-                Catch {
-                    Write-Error $PSItem
-                    Continue
-                }
 
-                If ($null -eq $Events) {continue}
+                [array]$Events = Get-WinEvent @getWinEventSplat
 
-                Write-Verbose 'Parsing returned events'
+                Write-Verbose 'Parsing returned events...'
                 ForEach ($Event in $Events) {
-                    If($Event | Where-Object {$_.Properties[2].Value -match $ADUser.SID.Value}) {
+                    If($Event | Where-Object {$_.Properties[2].Value -match $SID}) {
                         [PSCustomObject] @{
                             AccountName     = $Name
                             EventComputer   = $Event.Properties[4].Value
