@@ -63,7 +63,7 @@ RequiredModules = @(@{ModuleName="Configuration";RequiredVersion="1.2.0";GUID='e
 # TypesToProcess = @()
 
 # Format files (.ps1xml) to be loaded when importing this module
-# FormatsToProcess = @()
+FormatsToProcess = @('MDSTools.format.ps1xml')
 
 # Modules to import as nested modules of the module specified in ModuleToProcess
 # NestedModules = @()
