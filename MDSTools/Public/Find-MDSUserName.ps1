@@ -34,8 +34,6 @@ function Find-MDSUserName {
     Find-MDSUserName 12345 -FilterAttribute EmployeeID
     #>
 
-    #requires -Module ActiveDirectory
-
     Param(
         [parameter(Mandatory=$true)]
         [string[]]$NameValue,
@@ -46,10 +44,24 @@ function Find-MDSUserName {
 
     Begin {}
     Process {
+        # Use ADSISearcher to query Active Directory
+        $Searcher = New-Object -TypeName System.DirectoryServices.DirectorySearcher
+        $Searcher.PageSize = 200
+        $PropertiesToLoad = 'givenname','sn','samaccountname','userprincipalname','mail'
+        $Searcher.PropertiesToLoad.AddRange(($PropertiesToLoad))
+
         ForEach ($User in $NameValue) {
-            # Get SAM Account Name for specified user
-            Get-ADUser -Filter "$FilterAttribute -like '$User*'" |
-                Select-Object GivenName,SurName,SamAccountName,UserPrincipalName
+            $Searcher.Filter = ("{0}={1}" -f $FilterAttribute,$User)
+            ForEach ($Object in $($Searcher.FindAll())) {
+                [PSCustomObject] @{
+                    PSTypeName        = 'MDSTools.findMDSUserName'
+                    GivenName         = [string]$Object.properties.givenname
+                    SurName           = [string]$Object.properties.sn
+                    SamAccountName    = [string]$Object.properties.samaccountname
+                    UserPrincipalName = [string]$Object.properties.userprincipalname
+                    Mail              = [string]$Object.properties.mail
+                }
+            }
         }
     }
     End {}
