@@ -36,8 +36,8 @@ Task Init {
 Task UnitTests -Depends Init {
     $Lines
     'Running quick unit tests to fail early if there is an error'
-    $TestResults = Invoke-Pester -Path $ProjectRoot\Tests\*unit* -PassThru -Tag UnitTest 
-    
+    $TestResults = Invoke-Pester -Path $ProjectRoot\Tests\*unit* -PassThru -Tag UnitTest
+
     If ($TestResults.FailedCount -gt 0) {
         Write-Error "Failed '$($TestResults.FailedCount)' tests, build failed"
     }
@@ -75,9 +75,9 @@ Task Test -Depends UnitTests {
 Task Build -Depends Test {
     $Lines
 
-    $Functions = Get-ChildItem "$env:BHModulePath\Public\*.ps1" | 
+    $Functions = Get-ChildItem "$env:BHModulePath\Public\*.ps1" |
         Where-Object { $_.name -notmatch 'Tests'} |
-        Select-Object -ExpandProperty basename      
+        Select-Object -ExpandProperty basename
 
     # Load the module, read the exported functions, update the psd1 FunctionsToExport
     Set-ModuleFunctions -Name $env:BHPSModuleManifest -FunctionsToExport $functions
@@ -100,7 +100,7 @@ Task Build -Depends Test {
     ## Always increment the 'revision' number with BHBuildNumber
     $Script:Version = [version]::New($Version.Major, $Version.Minor, $Version.Build, $env:BHBuildNumber)
     Write-Host "Using version: $Version"
-        
+
     Update-Metadata -Path $env:BHPSModuleManifest -PropertyName ModuleVersion -Value $Version
 }
 
@@ -149,17 +149,17 @@ Task Deploy -Depends Build {
             Invoke-PSDeploy @Verbose @Params
         }
         Else {
-            "Skipping PS Gallery deployment: To deploy, ensure that...`n" + 
-            "`t* You are in a known build system (Current: $ENV:BHBuildSystem)`n" + 
-            "`t* You are committing to the master branch (Current: $ENV:BHBranchName) `n" + 
+            "Skipping PS Gallery deployment: To deploy, ensure that...`n" +
+            "`t* You are in a known build system (Current: $ENV:BHBuildSystem)`n" +
+            "`t* You are committing to the master branch (Current: $ENV:BHBranchName) `n" +
             "`t* Your commit message includes !deploy (Current: $ENV:BHCommitMessage)"
         }
     }
     Else
     {
-        "Skipping GitHub & PSGallery deployment: To deploy, ensure that...`n" + 
-        "`t* You are in a known build system (Current: $ENV:BHBuildSystem)`n" + 
-        "`t* You are committing to the master branch (Current: $ENV:BHBranchName) `n" + 
+        "Skipping GitHub & PSGallery deployment: To deploy, ensure that...`n" +
+        "`t* You are in a known build system (Current: $ENV:BHBuildSystem)`n" +
+        "`t* You are committing to the master branch (Current: $ENV:BHBranchName) `n" +
         "`t* Your commit message includes !deploy (Current: $ENV:BHCommitMessage)"
     }
 }
