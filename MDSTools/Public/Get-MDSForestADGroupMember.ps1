@@ -78,7 +78,7 @@ Function Get-MDSForestADGroupMember {
             }
 
             # Query AD for the group
-            Write-Verbose "Get-ADUser:  Querying server $($Server) where $($FilterProperty) equals $($Identity)"
+            Write-Verbose "Get-ADGroup:  Querying server $($Server) where $($FilterProperty) equals $($Identity)"
             #TODO:  Replace Get-ADGroup
             $getADGroupSplat = @{
                 Filter      = {$FilterProperty -eq $Identity}

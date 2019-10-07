@@ -60,7 +60,9 @@ Function Import-MDSExchOnline {
 				Remove-PSSession -Name $SessionName -ErrorAction Stop
 				Write-Verbose "Session $($SessionName) removed"
 			}
-			Catch {}
+			Catch {
+				$null
+			}
 		}
 	}
 	Process {
