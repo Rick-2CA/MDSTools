@@ -14,7 +14,7 @@ Function Update-MDSCredential {
     .NOTES
 
 	#>
-	[cmdletbinding()]
+	[CmdletBinding(SupportsShouldProcess)]
 	Param ()
 
     DynamicParam {
@@ -31,18 +31,21 @@ Function Update-MDSCredential {
         Try {
             $Hash = Get-MDSCredential -SortByName:$false -ErrorAction Stop
 
-            $Credentials = Get-Credential -ErrorAction Stop
-            $Username = $Credentials.UserName
-            $Password = $Credentials.Password | ConvertFrom-SecureString
-
             If ($Hash[$PSBoundParameters.Name]) {
-                $Hash.Remove($PSBoundParameters.Name)
-                $Hash.Add($PSBoundParameters.Name,@($UserName,$Password))
-                $Hash | Export-CliXML $CredentialFilePath
-                Write-Verbose "Updated credential record $($PSBoundParameters.Name)"
+                $Credentials = Get-Credential -Credential $Hash[$PSBoundParameters.Name][0] -ErrorAction Stop
+                $Username = $Credentials.UserName
+                $Password = $Credentials.Password | ConvertFrom-SecureString
+
+                $ShouldProcessChange = 'Update MDS Credential entry'
+                If ($PSCmdlet.ShouldProcess($PSBoundParameters.Name, $ShouldProcessChange)) {
+                   $Hash.Remove($PSBoundParameters.Name)
+                   $Hash.Add($PSBoundParameters.Name,@($UserName,$Password))
+                   $Hash | Export-CliXML $CredentialFilePath
+                   Write-Verbose "Updated credential record $($PSBoundParameters.Name)"
+                }
             }
             Else {
-                $Message = "A record for {0} does not exist." -f $Object
+                $Message = "A record for {0} does not exist." -f $PSBoundParameters.Name
                 Write-Error -Message $Message -ErrorAction Stop -Exception ([System.Management.Automation.MethodInvocationException]::new())
             }
         }
