@@ -42,8 +42,8 @@ Function Get-MDSCredential {
 		# Execute a Test-Path to avoid dynamic parameter creation errors
 		If ((Test-Path $CredentialFilePath) -eq $True) {
 			$Options = @(
-				Import-CliXML $CredentialFilePath -ErrorAction Stop |
-						Select-Object -ExpandProperty Keys | Sort-Object
+				$Xml = Import-CliXML $CredentialFilePath -ErrorAction Stop
+				$Xml.Keys | Sort-Object
 			)
 			New-DynamicParam -Name 'Name' -ValidateSet $Options -Position 0 -ParameterSetName 'Name'
 		}
