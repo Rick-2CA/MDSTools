@@ -53,14 +53,14 @@ Function Get-MDSForestADGroupMember {
 
             # Select the object type to query based on the identity provided
                 <#
-                Distinguished Name
-                    Example: CN=saradavisreports,OU=europe,CN=users,DC=corp,DC=contoso,DC=com
-                GUID (objectGUID)
-                    Example: 599c3d2e-f72d-4d20-8a88-030d99495f20
-                Security Identifier (objectSid)
-                    Example: S-1-5-21-3165297888-301567370-576410423-1103
-                Security Accounts Manager (SAM) Account Name (sAMAccountName)
-                    Example: saradavisreports
+                    Distinguished Name
+                        Example: CN=saradavisreports,OU=europe,CN=users,DC=corp,DC=contoso,DC=com
+                    GUID (objectGUID)
+                        Example: 599c3d2e-f72d-4d20-8a88-030d99495f20
+                    Security Identifier (objectSid)
+                        Example: S-1-5-21-3165297888-301567370-576410423-1103
+                    Security Accounts Manager (SAM) Account Name (sAMAccountName)
+                        Example: saradavisreports
                 #>
             $FilterProperty = Switch -Regex ($Identity) {
                 'CN=.*DC='  {'DistinguishedName'}
@@ -81,7 +81,7 @@ Function Get-MDSForestADGroupMember {
             Write-Verbose "Get-ADGroup:  Querying server $($Server) where $($FilterProperty) equals $($Identity)"
             #TODO:  Replace Get-ADGroup
             $getADGroupSplat = @{
-                Filter      = {$FilterProperty -eq $Identity}
+                Filter      = "$FilterProperty -eq '$Identity'"
                 Server      = $Server
                 ErrorAction = 'Stop'
             }
