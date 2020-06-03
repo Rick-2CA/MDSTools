@@ -9,6 +9,9 @@ function Find-MDSUserName {
     .Parameter FilterAttribute
     Specify a single attribute to query.  Default value uses Ambiguous Name Resolution (ANR) which searches up to 17 name related attributes in Active Directory.
 
+    .Parameter Server
+    Name of an Active Directory server.  If the GlobalCatalog switch is used the server should have global catalog enabled.
+
     .DESCRIPTION
     The Get-MDSUserName function uses the Get-ADUser cmdlet to query Active Directory for all users
 
@@ -39,7 +42,11 @@ function Find-MDSUserName {
         [string[]]$NameValue,
 
         [parameter(Mandatory=$false)]
-        [string]$FilterAttribute='ANR'
+        [string]$FilterAttribute='ANR',
+
+        [Parameter()]
+		[ValidateNotNullOrEmpty()]
+		[string]$Server
     )
 
     Begin {}
@@ -49,6 +56,10 @@ function Find-MDSUserName {
         $Searcher.PageSize = 200
         $PropertiesToLoad = 'givenname','sn','samaccountname','userprincipalname','mail'
         $Searcher.PropertiesToLoad.AddRange(($PropertiesToLoad))
+
+        If ($PSBoundParameters.ContainsKey('Server')) {
+            $Searcher.SearchRoot = [adsi]("{0}://{1}" -f 'LDAP',$Server)
+        }
 
         ForEach ($User in $NameValue) {
             $Searcher.Filter = ("{0}={1}" -f $FilterAttribute,$User)
