@@ -64,9 +64,18 @@ Function Start-MDSPowerShell {
 				$Parameters.Add('Credential',$Credential)
 			}
 
+			Switch ($PSVersionTable.PSEdition) {
+				'Core' {
+					$Parameters.Add('FilePath','pwsh')
+				}
+				Default {
+					$Parameters.Add('FilePath','PowerShell')
+				}
+			}
+
 			$ShouldProcessTarget = $Credential.UserName
 			If ($PSCmdlet.ShouldProcess($ShouldProcessTarget,$MyInvocation.MyCommand)) {
-				Start-Process PowerShell @Parameters
+				Start-Process @Parameters
 			}
 		}
 		Catch {
